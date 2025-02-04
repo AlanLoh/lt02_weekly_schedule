@@ -1,0 +1,3 @@
+include exoschedule/exoplanets.json
+include exoschedule/stars.json
+

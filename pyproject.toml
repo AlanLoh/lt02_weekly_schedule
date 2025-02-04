@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "exoschedule"
+description = "Weekly Scheduling for NenuFAR Exoplanet Team"
+dynamic = ["version"]
+authors = [
+    { name = "Alan Loh", email = "alan.loh@obspm.fr" }
+]
+requires-python = ">=3.8"
+classifiers=[
+    "Programming Language :: Python :: 3",
+    "Intended Audience :: Science/Research"
+]
+readme = "README.md"
+dependencies = [
+    "nenupy"
+]
+
+[tool.setuptools]
+script-files = [
+    "exoschedule/bin/exoschedule"
+]
+
+[tool.setuptools.packages.find]
+include = ["exoschedule", "exoschedule.*"]
+exclude = []
+
+[tool.pytest.ini_options]
+pythonpath = "."
+addopts = [
+    "--import-mode=importlib",
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "exoschedule.__version__"}

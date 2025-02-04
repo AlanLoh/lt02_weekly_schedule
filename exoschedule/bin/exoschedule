@@ -1,0 +1,78 @@
+#! /usr/bin/python3
+# -*- coding: utf-8 -*-
+
+__author__ = "Alan Loh"
+__copyright__ = "Copyright 2025, exoschedule"
+__credits__ = ["Alan Loh"]
+__maintainer__ = "Alan"
+__email__ = "alan.loh@obspm.fr"
+__status__ = "Production"
+__all__ = [
+    "parse_arguments"
+]
+
+import argparse
+from astropy.time import Time
+
+from exoschedule.functions import (
+    bookings_from_vcr,
+    write_booking_file,
+    load_exoplanet_list,
+    book_schedule,
+    plot_schedule,
+    write_parset_file
+)
+
+
+# ============================================================= #
+# ---------------------- argument_parser ---------------------- #
+def parse_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-t0", "--time_min", type=str, required=True,
+        help="Start time (UTC, ISOT format)."
+    )
+    parser.add_argument(
+        "-t1", "--time_max", type=str, required=False,
+        help="Stop time (UTC, ISOT format). If not user-defined, will be set to t0 + 7 days."
+    )
+    parser.add_argument(
+        "-vb", "--vcr_booking_csv", type=str, required=True,
+        help="CSV booking file downloaded from the VCR."
+    )
+    return args
+
+
+# ============================================================= #
+# --------------------------- main ---------------------------- #
+if __name__ == "__main__":
+
+    args = parse_arguments()
+
+    start_time = Time(args.time_min, format="isot")
+    stop_time = Time(args.time_max, format="isot")
+
+    # VCR booking
+    booking_slots = bookings_from_vcr(
+        vcr_current_booking=args.vcr_booking_csv,
+        start_time=start_time,
+        stop_time=stop_time
+    )
+
+    write_booking_file(booking_slots)
+
+    # Schedule the LT2 observations within the schedule
+    source_dict = load_exoplanet_list()
+
+    source_dict = update_exposure_time(source_dict)
+
+    scheduled_observations = book_schedule()
+
+    plot_schedule(scheduled_observations)
+
+    for observation in scheduled_observations:
+        write_parset_file(
+            observation
+        )
+# ============================================================= #
+# ============================================================= #
