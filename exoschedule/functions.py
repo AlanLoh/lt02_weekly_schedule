@@ -222,6 +222,20 @@ def obsid_to_timerange(observation_repository: str) -> Tuple[Time, Time]:
 
     return Time(f"{start_day_iso}T{start_hour_iso}"), Time(f"{stop_day_iso}T{stop_hour_iso}")
 
+# ============================================================= #
+# ------------------ find_source_directories ------------------ #
+def find_source_directories(source_name: str, data_path: str = "/databf/nenufar/LT02/") -> List[str]:
+    directories = []
+    year_paths = glob.glob(os.path.join(data_path, "*"))
+    for year_path in sorted(year_paths):
+        month_paths = glob.glob(os.path.join(year_path, "*"))
+        for month_path in sorted(month_paths):
+            observations = glob.glob(os.path.join(month_path, "*"))
+            for observation in sorted(observations):
+                if source_name.upper() not in observation:
+                    continue
+                directories.append(observation)
+    return directories
 
 # ============================================================= #
 # ----------------- get_source_exposure_time ------------------ #
@@ -242,19 +256,11 @@ def get_source_exposure_time(source_name: str, data_path: str = "/databf/nenufar
         The exposure time on source_name
     """
     exposure_time = TimeDelta(0, format="sec")
-    log.info(f"Looking out for data repositories involving '{source_name}'...")
-    year_paths = glob.glob(os.path.join(data_path, "*"))
-    for year_path in sorted(year_paths):
-        month_paths = glob.glob(os.path.join(year_path, "*"))
-        for month_path in sorted(month_paths):
-            observations = glob.glob(os.path.join(month_path, "*"))
-            n_observations += len(observations)
-            for observation in sorted(observations):
-                if source_name not in observation:
-                    continue
-                log.debug(f"\tfound '{observation}'")
-                start, stop = obsid_to_timerange(observation)
-                exposure_time += stop - start
+    log.debug(f"Looking out for data repositories involving '{source_name}'...")
+    observations = find_source_directories(source_name=source_name, data_path=data_path)
+    for observation in observations:
+        start, stop = obsid_to_timerange(observation)
+        exposure_time += stop - start
     return exposure_time
 
 
