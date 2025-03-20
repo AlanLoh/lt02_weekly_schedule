@@ -13,38 +13,39 @@ __all__ = [
     "get_exoplanet_dict",
     "get_star_dict",
     "obsid_to_timerange",
+    "get_source_directories",
     "get_source_exposure_time",
-    "update_exposure_time"
+    "update_exposure_time",
+    "update_minimal_elevation",
+    "clear_exposure_time"
 ]
 
 
 from astropy.time import Time, TimeDelta
+from astropy.coordinates import SkyCoord
+import astropy.units as u
 from typing import List, Tuple
 import numpy as np
 import operator
 import os
 import glob
 import json
+import subprocess
 import logging
 log = logging.getLogger("exoschedule")
 
 from nenupy.schedule import Schedule, ReservedBlock
+from nenupy.astro.target import FixedTarget
 
+from exoschedule import (
+    MIN_DURATION,
+    MID_DAY_START_HOUR,
+    MID_DAY_STOP_HOUR,
+    KP_CODE,
+    REMOTE_SERVER,
+    SPECIAL_CASES
+)
 
-# ============================================================= #
-# ---------------------- argument_parser ---------------------- #
-# Minimum booking slot is 1h
-MIN_DURATION = TimeDelta(3600, format="sec")
-
-# No booking between 11-15 UTC except Saturday and Sunday
-# to leave room for maintenance operations (and because the Sun
-# is quite high and ppolluting).
-MID_DAY_START_HOUR = 11
-MID_DAY_STOP_HOUR = 15
-
-KP_CODE = "LT02"
-# ============================================================= #
-# ============================================================= #
 
 # ============================================================= #
 # --------------------- bookings_from_vcr --------------------- #
@@ -115,8 +116,9 @@ def bookings_from_vcr(
 
         group_duration = group_stop - group_start
 
-        if (group_duration <= MIN_DURATION):
+        if (group_duration - MIN_DURATION) < (- 1 * u.s):
             log.info(f"Booking < min_duration ({MIN_DURATION.sec}s): {group_start.isot} - {group_stop.isot} --> skipped.")
+            continue
 
         free_bookings.append( (group_start, group_stop) )
 
@@ -138,10 +140,13 @@ def write_booking_file(booking_starts_stops: List[Tuple[Time, Time]], output_pat
     file_prefix : str, optional
         Prefix of the name so that the resulting file is "<file_prefix><kp_code>_booking.csv", by default "".
     """
-    file_name = os.path.join(output_path, f"{KP_CODE.lower()}_booking.csv")
+    file_name = os.path.join(output_path, f"{file_prefix}{KP_CODE.lower()}_booking.csv")
     with open(file_name, "w") as wfile:
         for booking in booking_starts_stops:
-            wfile.write(f"{booking[0]},{booking[1]},{KP_CODE},Nenupy Weekly Schedule\n")
+            # Only write time at the second precision
+            booking[0].precision = 0
+            booking[1].precision = 0
+            wfile.write(f"{booking[0].iso},{booking[1].iso},{KP_CODE},nenupy Weekly Schedule\n")
     log.info(f"{file_name} written.")
 
 
@@ -195,6 +200,7 @@ def get_star_dict() -> dict:
     """
     return _get_source_dict("stars.json")
 
+
 # ============================================================= #
 # --------------------- obsid_to_timerange -------------------- #
 def obsid_to_timerange(observation_repository: str) -> Tuple[Time, Time]:
@@ -222,9 +228,22 @@ def obsid_to_timerange(observation_repository: str) -> Tuple[Time, Time]:
 
     return Time(f"{start_day_iso}T{start_hour_iso}"), Time(f"{stop_day_iso}T{stop_hour_iso}")
 
+
 # ============================================================= #
 # ------------------ find_source_directories ------------------ #
-def find_source_directories(source_name: str, data_path: str = "/databf/nenufar/LT02/") -> List[str]:
+def _find_via_ssh(data_path: str) -> List[str]:
+    log.info(f"Searching for observations in '{data_path}' via SSH to {REMOTE_SERVER}...")
+    commands = [
+        f"ssh {REMOTE_SERVER} 'find {data_path} -mindepth 3 -maxdepth 3 -type d'"
+    ]
+    proc = subprocess.Popen("; ".join(commands), shell=True, stdout=subprocess.PIPE, executable="/bin/bash")
+    stdout, stderr = proc.communicate()
+    exitcode = proc.returncode
+    observation_directories =  stdout.decode("utf-8").split("\n")[:-1]
+    return observation_directories
+
+def _find_via_glob(data_path: str) -> List[str]:
+    log.info(f"Searching for observations in '{data_path}' locally...")
     directories = []
     year_paths = glob.glob(os.path.join(data_path, "*"))
     for year_path in sorted(year_paths):
@@ -232,41 +251,139 @@ def find_source_directories(source_name: str, data_path: str = "/databf/nenufar/
         for month_path in sorted(month_paths):
             observations = glob.glob(os.path.join(month_path, "*"))
             for observation in sorted(observations):
-                if source_name.upper() not in observation:
-                    continue
                 directories.append(observation)
+    return directories
+
+def find_directories(*data_paths: str) -> List[str]:
+    observations_by_path = []
+    for path in data_paths:
+        if os.path.isdir(path):
+            # The data are local
+            observations_by_path.append(
+                _find_via_glob(data_path=path)
+            )
+        else:
+            # Remote connexion using REMOTE_SERVER
+            observations_by_path.append(
+                _find_via_ssh(data_path=path)
+            )
+    return sum(observations_by_path, [])
+
+
+# ============================================================= #
+# ------------------ get_source_directories ------------------- #
+def get_source_directories(source_name: str, observation_directories: List[str]) -> List[str]:
+    """Filter the observation direcotries by source name.
+    This uses the SPECIAL_CASES variable where several alternative source name may be defined.
+
+    Parameters
+    ----------
+    source_name : str
+        The name of the source as it should appear in the JSON file
+    observation_directories : List[str]
+        List of observation directories such as returned by find_directories()
+
+    Returns
+    -------
+    List[str]
+        List of source directories
+    """
+    source_name = source_name.upper()
+
+    # Filter out directories containing the source name
+    directories = []
+    for obs_dir in observation_directories:
+        src_known_names = SPECIAL_CASES.get(source_name, {}).get("include", [source_name])
+        not_the_src = SPECIAL_CASES.get(source_name, {}).get("exclude", [])
+        if any(name in obs_dir for name in src_known_names) and not any(other in obs_dir for other in not_the_src):
+            directories.append(obs_dir)
+    log.debug(f"{len(directories)} observations found for source '{source_name}'.")
+
     return directories
 
 # ============================================================= #
 # ----------------- get_source_exposure_time ------------------ #
-def get_source_exposure_time(source_name: str, data_path: str = "/databf/nenufar/LT02/") -> TimeDelta:
+def get_source_exposure_time(source_name: str, observation_directories: List[str]) -> TimeDelta:
     """Get the total amount of exposure time spent on source_name.
     This will look into all repo within data_path and search for any directory containing source_name.
 
     Parameters
     ----------
     source_name : str
-        The name of the source as it should appear in the observaiton repositories
-    data_path : str, optional
-        The path where all observations are put together, it is better to search the nenufar repo (containing only statistical data) as it lists everything, by default "/databf/nenufar/LT02/"
+        The name of the source as it should appear in the JSON file
+    observation_directories : List[str]
+        List of observation directories such as returned by find_directories()
 
     Returns
     -------
     TimeDelta
         The exposure time on source_name
     """
+    directories = get_source_directories(
+        source_name=source_name,
+        observation_directories=observation_directories
+    )
+
+    # Computing the cumulative exposure time
     exposure_time = TimeDelta(0, format="sec")
-    log.debug(f"Looking out for data repositories involving '{source_name}'...")
-    observations = find_source_directories(source_name=source_name, data_path=data_path)
-    for observation in observations:
+    for observation in directories:
         start, stop = obsid_to_timerange(observation)
         exposure_time += stop - start
+
     return exposure_time
 
 
 # ============================================================= #
+# ---------------- get_source_last_observation ---------------- #
+def get_source_last_observation(source_name: str, observation_directories: List[str]) -> Time:
+    directories = get_source_directories(
+        source_name=source_name,
+        observation_directories=observation_directories
+    )
+
+    if len(directories) == 0:
+        # The source has never been observed
+        log.warning(f"{source_name} has never been observed.")
+        default_time = Time("2000-01-01T00:00:00")
+        default_time.precision = 0
+        return default_time
+
+    directories = sorted(directories)
+    latest_directory = directories[-1]
+    observation_time, _ = obsid_to_timerange(latest_directory)
+
+    observation_time.precision = 0
+
+    return observation_time
+
+
+# ============================================================= #
+# -------------------- _modify_json_files --------------------- #
+def _modify_json_files(source_dict: dict) -> None:
+    """Find out which JSON file corresponds with the source_dict and save it.
+
+    Parameters
+    ----------
+    source_dict : dict
+        Dictionnary of sources
+    """
+    first_source = list(source_dict.keys())[0]
+    # Find out which of the json file this dict corresponds with
+    this_directory = os.path.dirname(__file__)
+    if first_source in list(get_star_dict().keys()):            
+        json_file = os.path.join(this_directory, "stars.json")
+    else:
+        json_file = os.path.join(this_directory, "exoplanets.json")
+    
+    log.info(f"Updating '{json_file}'...")
+    
+    with open(json_file, "w") as wfile:
+        json.dump(source_dict, wfile)
+
+
+# ============================================================= #
 # ------------------- update_exposure_time -------------------- #
-def update_exposure_time(source_dict: dict, data_path: str = "/databf/nenufar/LT02/", save: bool = False) -> dict:
+def update_exposure_time(source_dict: dict, *data_paths: str, save: bool = False) -> dict:
     """Update the exposure time of every source in source_dict with observations found in datapath.
     For every source get_source_exposure_time() is called: the data repository names are parsed to figure out the exposure time from the obsid.
 
@@ -274,8 +391,102 @@ def update_exposure_time(source_dict: dict, data_path: str = "/databf/nenufar/LT
     ----------
     source_dict : dict
         The source dictionnary (such as returned by get_exoplanet_dict() for instance)
-    data_path : str
-        The path where all the data repositories are, by default "/databf/nenufar/LT02/"
+    data_paths : str
+        The path(s) where all the data repositories are
+    save : bool, optional
+        If True the JSON files are updated with the new exposure times, by default False
+
+    Returns
+    -------
+    dict
+        The source dictionnary with the exposure time updated
+    
+    Example
+    -------
+    .. code-block:: python
+
+        >>> from exoschedule.functions import get_exoplanet_dict, update_exposure_time
+        >>> ep = get_exoplanet_dict()
+        >>> ep = update_exposure_time(ep, "/databf/nenufar/LT02", "/databf/nenufar/ES02", save=True)
+    """
+
+    obs_directories = find_directories(*data_paths)
+
+    for src in source_dict:
+        dt = get_source_exposure_time(source_name=src, observation_directories=obs_directories)
+        last_obs = get_source_last_observation(source_name=src, observation_directories=obs_directories)
+        previous_exposure_time = source_dict[src]["exposure_time_hours"]
+        current_exposure_time = dt.sec / 3600
+        source_dict[src]["exposure_time_hours"] = current_exposure_time
+        source_dict[src]["last_observation"] = last_obs.isot
+        if current_exposure_time != previous_exposure_time:
+            log.info(f"{src}: DT={(current_exposure_time - previous_exposure_time)}h added.")
+
+    if save:
+        _modify_json_files(source_dict)
+    
+    return source_dict
+
+
+# ============================================================= #
+# ----------------- update_minimal_elevation ------------------ #
+def update_minimal_elevation(source_dict: dict, save: bool = False, minimal_elevation: u.Quantity = None) -> dict:
+    """Update the minimal observing elevation in the source dictionnary.
+    For every source, its visibility at Nançay is computed, namely its maximal and minimal altitude (a_max, and a_min).
+    if a_max - 10 deg < 20 deg: minimal_elevation = 20 deg
+    elif a_max - 10 deg > 60 deg: minimal_elevation = 60 deg
+    else minimal_elevation = a_max - 10 deg
+
+    Parameters
+    ----------
+    source_dict : dict
+        The source dictionnary (such as returned by get_exoplanet_dict() for instance)
+    save : bool, optional
+        If True the JSON files are updated with the new exposure times, by default False
+    minimal_elevation : astropy.units.Quantity, optional
+        If a value is given, every source will be updated with this value, by default None
+
+    Returns
+    -------
+    dict
+        The source dictionnary with the minimal_elevation updated
+    """
+
+    for src in source_dict:
+
+        if minimal_elevation is None:
+            skycoord = SkyCoord(
+                source_dict[src]["ra"],
+                source_dict[src]["dec"],
+                unit=(u.hourangle, u.deg)
+            )
+            target = FixedTarget(skycoord)
+            max_elev = target.elevation_max.deg
+            minimal_elev = max_elev - 10
+            if minimal_elev < 20:
+                minimal_elev = 20
+            elif minimal_elev > 60:
+                minimal_elev = 60
+        else:
+            minimal_elev = minimal_elevation
+
+        source_dict[src]["minimal_elevation"] = minimal_elev
+
+    if save:
+        _modify_json_files(source_dict)
+    
+    return source_dict
+
+
+# ============================================================= #
+# -------------------- clear_exposure_time -------------------- #
+def clear_exposure_time(source_dict: dict, save: bool = False) -> dict:
+    """Set every source's exposure_time listed in source_dict to 0.
+
+    Parameters
+    ----------
+    source_dict : dict
+        Disctionnary of sources.
     save : bool, optional
         If True the JSON files are updated with the new exposure times, by default False
 
@@ -284,24 +495,12 @@ def update_exposure_time(source_dict: dict, data_path: str = "/databf/nenufar/LT
     dict
         The source dictionnary with the exposure time updated
     """
-
     for src in source_dict:
-        dt = get_source_exposure_time(src, data_path=data_path)
-        source_dict["exposure_time_hours"] = dt.sec / 3600
+        source_dict[src]["exposure_time_hours"] = 0
 
     if save:
-        # Find out which of the json file this dict corresponds with
-        this_directory = os.path.dirname(__file__)
-        if src in list(get_star_dict().keys()):            
-            json_file = os.path.join(this_directory, "stars.json")
-        else:
-            json_file = os.path.join(this_directory, "exoplanets.json")
-        
-        log.info(f"Updating '{json_file}'...")
-        
-        with open(json_file, "w") as wfile:
-            json.dump(source_dict, wfile)
-    
+        _modify_json_files(source_dict)
+
     return source_dict
 
 # # ============================================================= #

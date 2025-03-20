@@ -1,6 +1,12 @@
 #! /usr/bin/python3
 # -*- coding: utf-8 -*-
 
+"""
+Example
+
+    exoschedule -t0 2025-02-17T00:00:00 -t1 2025-02-24T00:00:00 -b /Users/aloh/Documents/Work/NenuFAR/LT02_Exoplanets/Weekly_Schedule/TESTS/2025-02-14_booking.csv -o /Users/aloh/Documents/Work/NenuFAR/LT02_Exoplanets/Weekly_Schedule/TESTS/
+"""
+
 __author__ = "Alan Loh"
 __copyright__ = "Copyright 2025, exoschedule"
 __credits__ = ["Alan Loh"]
@@ -13,15 +19,25 @@ __all__ = [
 
 import argparse
 from astropy.time import Time
+import logging
+log = logging.getLogger("exoschedule")
 
 from exoschedule.functions import (
+    clear_exposure_time,
     bookings_from_vcr,
     write_booking_file,
-    load_exoplanet_list,
-    book_schedule,
+    get_exoplanet_dict,
+    get_star_dict,
+    update_exposure_time,
+    update_minimal_elevation
+)
+from exoschedule.schedule import (
+    build_observation_blocks,
+    book_observations,
     plot_schedule,
     write_parset_file
 )
+from exoschedule import DATA_REPOSITORIES
 
 
 # ============================================================= #
@@ -36,10 +52,34 @@ def parse_arguments():
         "-t1", "--time_max", type=str, required=False,
         help="Stop time (UTC, ISOT format). If not user-defined, will be set to t0 + 7 days."
     )
+    # parser.add_argument(
+    #     "-u", "--update_data", type=bool, required=False, default=True,
+    #     help="Update the exposure time in the JSON files."
+    # )
+    parser.add_argument("-u", "--update_data", action="store_true", help="Update the exposure time in the JSON files.")
+    parser.add_argument("-nu", "--no-update_data", dest="update_data", action="store_false", help="Do not update the exposure time in the JSON files.")
+    parser.set_defaults(update_data=True)
     parser.add_argument(
-        "-vb", "--vcr_booking_csv", type=str, required=True,
+        "-b", "--vcr_booking_csv", type=str, required=True,
         help="CSV booking file downloaded from the VCR."
     )
+    parser.add_argument(
+        "-o", "--output_path", type=str, required=True,
+        help="Where every result / parset will be written."
+    )
+    parser.add_argument(
+        "-n", "--max_repetitions", type=int, required=False, default=2,
+        help="Maximum number of observations per target."
+    )
+    parser.add_argument(
+        "-m", "--merge_existing_booking", type=bool, required=False, default=False,
+        help="Merge with exisiting booking"
+    )
+    parser.add_argument(
+        "-s", "--priority_source", nargs="*", required=False,
+        help="Set these sources as priority targets"
+    )
+    args = parser.parse_args()
     return args
 
 
@@ -49,30 +89,67 @@ if __name__ == "__main__":
 
     args = parse_arguments()
 
+    # Read the source data
+    exop = get_exoplanet_dict()
+    star = get_star_dict()
+
+    # Update the source data, i.e. their exposure time
+    if args.update_data:
+        log.info("Updating the data repositories, this may take a few minutes if this is not already cached...")
+        log.info("Once it's done, you can shift+opt+f on a MacOS to make the JSON pretty ;)...")
+        # exop = clear_exposure_time(exop)
+        exop = update_exposure_time(exop, *DATA_REPOSITORIES, save=True)
+        # star = clear_exposure_time(star)
+        star = update_exposure_time(star, *DATA_REPOSITORIES, save=True)
+
+        exop = update_minimal_elevation(exop, save=True)
+        star = update_minimal_elevation(star, save=True)
+
     start_time = Time(args.time_min, format="isot")
     stop_time = Time(args.time_max, format="isot")
+    prefix = f"{start_time.isot.split('T')[0]}_{stop_time.isot.split('T')[0]}_"
 
     # VCR booking
     booking_slots = bookings_from_vcr(
         vcr_current_booking=args.vcr_booking_csv,
         start_time=start_time,
-        stop_time=stop_time
+        stop_time=stop_time,
+        merge_slots=args.merge_existing_booking
     )
 
-    write_booking_file(booking_slots)
+    write_booking_file(
+        booking_starts_stops=booking_slots,
+        output_path=args.output_path,
+        file_prefix=prefix
+    )
+
+    # Define observation blocks
+    blocks = build_observation_blocks(exop)
+    blocks += build_observation_blocks(star)
+    blocks *= args.max_repetitions
 
     # Schedule the LT2 observations within the schedule
-    source_dict = load_exoplanet_list()
+    scheduled_observations = book_observations(
+        booking_starts_stops=booking_slots,
+        source_dict={**exop, **star},
+        observation_blocks=blocks,
+        priority_sources=args.priority_source
+    )
 
-    source_dict = update_exposure_time(source_dict)
+    plot_schedule(
+        schedule=scheduled_observations,
+        source_dict={**exop, **star},
+        output_path=args.output_path,
+        file_prefix=prefix
+    )
 
-    scheduled_observations = book_schedule()
-
-    plot_schedule(scheduled_observations)
-
-    for observation in scheduled_observations:
+    results = scheduled_observations.export()
+    for observation in results:
         write_parset_file(
-            observation
+            schedule_row=observation,
+            source_dict={**exop, **star},
+            output_path=args.output_path,
+            file_prefix=prefix
         )
 # ============================================================= #
 # ============================================================= #

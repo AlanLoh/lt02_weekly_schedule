@@ -6,12 +6,12 @@
         "secondary_targets": null,
         "ra": "01:39:01.6",
         "dec": "-17:57:01.4",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
+        "minimal_obs_time_minutes": 60,
         "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "exposure_time_hours": 73.5,
+        "last_observation": "2023-02-02T16:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -21,8 +21,6 @@
             ]
         }
     },
-        
-
     "SIMP_J013656_5+093347_3": {
         "real_name": "SIMP_J013656_5+093347_3",
         "todo": "finalize",
@@ -30,12 +28,12 @@
         "secondary_targets": null,
         "ra": "01:36:56.6",
         "dec": "09:33:47.3",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 42.18662788888889,
+        "exposure_time_hours": 45.00000000000001,
+        "last_observation": "2024-07-06T06:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -45,8 +43,6 @@
             ]
         }
     },
-        
-
     "GJ_65": {
         "real_name": "GJ_65",
         "todo": "abort",
@@ -54,12 +50,12 @@
         "secondary_targets": null,
         "ra": "01:39:01.4",
         "dec": "-17:57:02.4",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
+        "minimal_obs_time_minutes": 60,
         "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "exposure_time_hours": 49.0,
+        "last_observation": "2024-06-30T07:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -77,8 +73,6 @@
             ]
         }
     },
-        
-
     "V773_TAU": {
         "real_name": "V773_TAU",
         "todo": "observation",
@@ -86,12 +80,12 @@
         "secondary_targets": null,
         "ra": "04:14:12.9",
         "dec": "28:12:12.4",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 6.383333333333332,
+        "last_observation": "2024-12-05T16:55:00",
         "off_beams": {
             "option_1": [
                 {
@@ -101,8 +95,6 @@
             ]
         }
     },
-        
-
     "V830_TAU": {
         "real_name": "V830_TAU",
         "todo": "observation",
@@ -110,12 +102,12 @@
         "secondary_targets": null,
         "ra": "04:33:10",
         "dec": "24:33:43.2",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 57.185489000000004,
+        "exposure_time_hours": 26.65,
+        "last_observation": "2019-04-13T12:11:00",
         "off_beams": {
             "option_1": [
                 {
@@ -125,8 +117,6 @@
             ]
         }
     },
-        
-
     "WISE_J062309_94-045624_6": {
         "real_name": "WISE_J062309_94-045624_6",
         "todo": "observation",
@@ -134,11 +124,11 @@
         "secondary_targets": null,
         "ra": "06:23:09.6",
         "dec": "-04:56:23.6",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 27.68360011111111,
+        "exposure_time_hours": 0.0,
         "last_observation": "2000-01-01T00:00:00",
         "off_beams": {
             "option_1": [
@@ -149,8 +139,6 @@
             ]
         }
     },
-        
-
     "YZ_CMI": {
         "real_name": "YZ_CMI",
         "todo": "observation",
@@ -158,12 +146,12 @@
         "secondary_targets": null,
         "ra": "07:44:40.1",
         "dec": "03:33:08.9",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 36.17596122222222,
+        "exposure_time_hours": 120.43333333333334,
+        "last_observation": "2023-11-03T03:15:00",
         "off_beams": {
             "option_1": [
                 {
@@ -173,8 +161,6 @@
             ]
         }
     },
-        
-
     "WISE_J092055_40+453856_3": {
         "real_name": "WISE_J092055_40+453856_3",
         "todo": "observation",
@@ -182,12 +168,12 @@
         "secondary_targets": null,
         "ra": "09:20:55.4",
         "dec": "45:39:05.1",
-        "source_type": "exoplanet",
+        "source_type": "star-l",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 99.06666666666666,
+        "last_observation": "2024-10-04T08:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -197,8 +183,6 @@
             ]
         }
     },
-        
-
     "AB_Lmi": {
         "real_name": "AB_Lmi",
         "todo": "observation",
@@ -206,12 +190,12 @@
         "secondary_targets": null,
         "ra": "10:04:36.3",
         "dec": "31:52:49.5",
-        "source_type": "exoplanet",
+        "source_type": "star-l",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 92.91666666666667,
+        "last_observation": "2024-10-03T07:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -221,8 +205,6 @@
             ]
         }
     },
-        
-
     "WISEPA_J101905": {
         "real_name": "WISEPA_J101905",
         "todo": "observation",
@@ -230,12 +212,12 @@
         "secondary_targets": null,
         "ra": "10:19:05.7",
         "dec": "65:29:52.6",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 294.2,
+        "last_observation": "2024-06-22T15:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -245,8 +227,6 @@
             ]
         }
     },
-        
-
     "AD_LEO": {
         "real_name": "AD_LEO",
         "todo": "observation",
@@ -254,12 +234,12 @@
         "secondary_targets": null,
         "ra": "10:19:36.2",
         "dec": "19:52:12.1",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 52.49351677777778,
+        "exposure_time_hours": 453.13333333333327,
+        "last_observation": "2024-02-08T23:30:00",
         "off_beams": {
             "option_1": [
                 {
@@ -269,8 +249,6 @@
             ]
         }
     },
-        
-
     "LP212-62": {
         "real_name": "LP212-62",
         "todo": "observation",
@@ -278,12 +256,12 @@
         "secondary_targets": null,
         "ra": "10:23:51.8",
         "dec": "43:53:33.1",
-        "source_type": "exoplanet",
+        "source_type": "star-l",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 311.85,
+        "last_observation": "2025-02-07T22:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -293,8 +271,6 @@
             ]
         }
     },
-        
-
     "2MASS_J10475385+2124234": {
         "real_name": "2MASS_J10475385+2124234",
         "todo": "observation",
@@ -302,12 +278,12 @@
         "secondary_targets": null,
         "ra": "10:47:53.8",
         "dec": "21:24:23.6",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 54.03004455555555,
+        "exposure_time_hours": 56.86666666666667,
+        "last_observation": "2023-06-22T15:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -317,8 +293,6 @@
             ]
         }
     },
-        
-
     "DM_UMA": {
         "real_name": "DM_UMA",
         "todo": "observation",
@@ -326,12 +300,12 @@
         "secondary_targets": null,
         "ra": "10:55:43.5",
         "dec": "60:28:09.7",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 33.69999999999999,
+        "last_observation": "2023-10-02T10:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -341,8 +315,6 @@
             ]
         }
     },
-        
-
     "ILTJ1101+5521": {
         "real_name": "ILTJ1101+5521",
         "todo": "observation",
@@ -350,12 +322,12 @@
         "secondary_targets": null,
         "ra": "11:01:50.5",
         "dec": "55:21:19.6",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 34.24999999999999,
+        "last_observation": "2024-10-13T06:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -365,8 +337,6 @@
             ]
         }
     },
-        
-
     "WX_UMA": {
         "real_name": "WX_UMA",
         "todo": "observation",
@@ -374,12 +344,12 @@
         "secondary_targets": null,
         "ra": "11:05:30.8",
         "dec": "43:31:17.9",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 138.95,
+        "last_observation": "2023-07-08T16:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -389,8 +359,6 @@
             ]
         }
     },
-        
-
     "WISEP_J112254_73+255021_5": {
         "real_name": "WISEP_J112254_73+255021_5",
         "todo": "abort",
@@ -398,12 +366,12 @@
         "secondary_targets": null,
         "ra": "11:22:55.4",
         "dec": "25:50:25.1",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 58.46379455555555,
+        "exposure_time_hours": 93.68333333333332,
+        "last_observation": "2024-07-06T16:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -413,8 +381,6 @@
             ]
         }
     },
-        
-
     "GJ_1151": {
         "real_name": "GJ_1151",
         "todo": "observation",
@@ -422,12 +388,12 @@
         "secondary_targets": null,
         "ra": "11:50:57.7",
         "dec": "48:22:38.5",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 549.4666666666667,
+        "last_observation": "2025-02-10T03:12:00",
         "off_beams": {
             "option_1": [
                 {
@@ -445,8 +411,6 @@
             ]
         }
     },
-        
-
     "ILTJ132707_56+342337_9": {
         "real_name": "ILTJ132707_56+342337_9",
         "todo": "observation",
@@ -454,12 +418,12 @@
         "secondary_targets": null,
         "ra": "13:27:07.5",
         "dec": "34:23:36.8",
-        "source_type": "exoplanet",
+        "source_type": "star-l",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 57.333333333333336,
+        "last_observation": "2025-01-17T04:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -469,8 +433,6 @@
             ]
         }
     },
-        
-
     "BH_CVN": {
         "real_name": "BH_CVN",
         "todo": "observation",
@@ -478,12 +440,12 @@
         "secondary_targets": null,
         "ra": "13:34:47.7",
         "dec": "37:10:56.7",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 60.999999999999986,
+        "last_observation": "2025-01-24T05:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -493,8 +455,6 @@
             ]
         }
     },
-        
-
     "CU_Vir": {
         "real_name": "CU_Vir",
         "todo": "observation",
@@ -502,12 +462,12 @@
         "secondary_targets": null,
         "ra": "14:12:15.7",
         "dec": "02:24:34.1",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 35.03296122222222,
+        "exposure_time_hours": 56.21666666666667,
+        "last_observation": "2024-12-15T07:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -517,8 +477,6 @@
             ]
         }
     },
-        
-
     "EK_Dra": {
         "real_name": "EK_Dra",
         "todo": "observation",
@@ -526,12 +484,12 @@
         "secondary_targets": null,
         "ra": "14:39:00.1",
         "dec": "64:17:29.9",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 58.83333333333333,
+        "last_observation": "2025-01-10T05:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -541,8 +499,6 @@
             ]
         }
     },
-        
-
     "TVLM_513-46546": {
         "real_name": "TVLM_513-46546",
         "todo": "observation",
@@ -550,12 +506,12 @@
         "secondary_targets": null,
         "ra": "15:01:08.1",
         "dec": "22:50:02.2",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 55.45743344444445,
+        "exposure_time_hours": 168.2666666666667,
+        "last_observation": "2024-08-24T15:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -565,8 +521,6 @@
             ]
         }
     },
-        
-
     "StKM_1-1262": {
         "real_name": "StKM_1-1262",
         "todo": "observation",
@@ -574,12 +528,12 @@
         "secondary_targets": null,
         "ra": "15:37:09.3",
         "dec": "53:19:20.4",
-        "source_type": "exoplanet",
+        "source_type": "star-l",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 425.16666666666663,
+        "last_observation": "2024-10-09T15:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -593,20 +547,18 @@
             ]
         }
     },
-        
-
     "T_CrB": {
         "real_name": "T_CrB",
-        "todo": "abort",
+        "todo": "finalize",
         "main_target": true,
         "secondary_targets": null,
         "ra": "15:59:30.1",
         "dec": "25:55:12.6",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 58.543655666666666,
+        "exposure_time_hours": 0.0,
         "last_observation": "2000-01-01T00:00:00",
         "off_beams": {
             "option_1": [
@@ -617,8 +569,6 @@
             ]
         }
     },
-        
-
     "SIG_CRB": {
         "real_name": "SIG_CRB",
         "todo": "observation",
@@ -626,12 +576,12 @@
         "secondary_targets": null,
         "ra": "16:14:40.8",
         "dec": "33:51:30.9",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 109.61666666666665,
+        "last_observation": "2023-03-17T03:15:00",
         "off_beams": {
             "option_1": [
                 {
@@ -641,8 +591,6 @@
             ]
         }
     },
-        
-
     "CR_Dra": {
         "real_name": "CR_Dra",
         "todo": "observation",
@@ -650,12 +598,12 @@
         "secondary_targets": null,
         "ra": "16:17:05.3",
         "dec": "55:16:08.7",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 574.2333333333333,
+        "last_observation": "2024-10-19T10:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -673,8 +621,6 @@
             ]
         }
     },
-        
-
     "ILTJ181635_95+451033_9": {
         "real_name": "ILTJ181635_95+451033_9",
         "todo": "observation",
@@ -682,12 +628,12 @@
         "secondary_targets": null,
         "ra": "18:16:35.9",
         "dec": "45:10:34.2",
-        "source_type": "exoplanet",
+        "source_type": "star-l",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 19.999999999999996,
+        "last_observation": "2024-09-16T15:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -697,8 +643,6 @@
             ]
         }
     },
-        
-
     "LSR_J1835+3259": {
         "real_name": "LSR_J1835+3259",
         "todo": "observation",
@@ -706,12 +650,12 @@
         "secondary_targets": null,
         "ra": "18:35:37.8",
         "dec": "32:59:53.3",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 142.1,
+        "last_observation": "2023-04-18T03:30:00",
         "off_beams": {
             "option_1": [
                 {
@@ -721,8 +665,6 @@
             ]
         }
     },
-        
-
     "V0636_Lyr": {
         "real_name": "V0636_Lyr",
         "todo": "observation",
@@ -730,12 +672,12 @@
         "secondary_targets": null,
         "ra": "18:47:52.7",
         "dec": "38:42:18.3",
-        "source_type": "exoplanet",
+        "source_type": "star-l",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 20.999999999999996,
+        "last_observation": "2024-09-10T18:30:00",
         "off_beams": {
             "option_1": [
                 {
@@ -745,8 +687,6 @@
             ]
         }
     },
-        
-
     "GJ_1243": {
         "real_name": "GJ_1243",
         "todo": "observation",
@@ -754,12 +694,12 @@
         "secondary_targets": null,
         "ra": "19:51:09.2",
         "dec": "46:29:00.2",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 94.88333333333334,
+        "last_observation": "2024-03-06T09:20:00",
         "off_beams": {
             "option_1": [
                 {
@@ -769,8 +709,6 @@
             ]
         }
     },
-        
-
     "AE_Aqr": {
         "real_name": "AE_Aqr",
         "todo": "observation",
@@ -778,12 +716,12 @@
         "secondary_targets": null,
         "ra": "20:40:09.1",
         "dec": "-00:52:15.2",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 31.752600111111107,
+        "exposure_time_hours": 16.499999999999996,
+        "last_observation": "2024-10-27T17:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -793,8 +731,6 @@
             ]
         }
     },
-        
-
     "V0612_Cyg": {
         "real_name": "V0612_Cyg",
         "todo": "observation",
@@ -802,12 +738,12 @@
         "secondary_targets": null,
         "ra": "21:29:19.5",
         "dec": "45:56:55.8",
-        "source_type": "exoplanet",
+        "source_type": "star-l",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 67.99999999999999,
+        "last_observation": "2024-11-30T20:13:00",
         "off_beams": {
             "option_1": [
                 {
@@ -817,8 +753,6 @@
             ]
         }
     },
-        
-
     "FK_Aqr": {
         "real_name": "FK_Aqr",
         "todo": "observation",
@@ -826,11 +760,11 @@
         "secondary_targets": null,
         "ra": "22:38:45.5",
         "dec": "-20:37:16.4",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
+        "minimal_obs_time_minutes": 60,
         "minimal_elevation": 20,
-        "exposure_time_hours": 0,
+        "exposure_time_hours": 0.0,
         "last_observation": "2000-01-01T00:00:00",
         "off_beams": {
             "option_1": [
@@ -841,8 +775,6 @@
             ]
         }
     },
-        
-
     "EV_LAC": {
         "real_name": "EV_LAC",
         "todo": "observation",
@@ -850,12 +782,12 @@
         "secondary_targets": null,
         "ra": "22:46:49.6",
         "dec": "44:20:02.3",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 102.99999999999999,
+        "last_observation": "2024-12-10T15:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -865,8 +797,6 @@
             ]
         }
     },
-        
-
     "EQ_PEG": {
         "real_name": "EQ_PEG",
         "todo": "observation",
@@ -874,12 +804,12 @@
         "secondary_targets": null,
         "ra": "23:31:52.1",
         "dec": "19:56:14",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 52.560711222222224,
+        "exposure_time_hours": 49.93333333333333,
+        "last_observation": "2025-01-22T15:00:00",
         "off_beams": {
             "option_1": [
                 {
@@ -889,8 +819,6 @@
             ]
         }
     },
-        
-
     "II_PEG": {
         "real_name": "II_PEG",
         "todo": "observation",
@@ -898,12 +826,12 @@
         "secondary_targets": null,
         "ra": "23:55:04",
         "dec": "28:38:01.1",
-        "source_type": "exoplanet",
+        "source_type": "star",
         "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 120,
-        "minimal_elevation": 20,
-        "exposure_time_hours": 0,
-        "last_observation": "2000-01-01T00:00:00",
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 47.666666666666664,
+        "last_observation": "2025-01-10T15:00:00",
         "off_beams": {
             "option_1": [
                 {
