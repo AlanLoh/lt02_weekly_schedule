@@ -1578,7 +1578,7 @@
         "secondary_targets": null,
         "ra": "16:25:24.5",
         "dec": "54:18:14.7",
-        "source_type": "exoplanet",
+        "source_type": "exoplanet-l",
         "nominal_obs_time_minutes": 480,
         "minimal_obs_time_minutes": 60,
         "minimal_elevation": 60,
@@ -2509,6 +2509,36 @@
                 {
                     "ra": "22:58:38",
                     "dec": "-03:10:45"
+                }
+            ]
+        }
+    },
+    "TOI-3884": {
+        "real_name": "TOI-3884",
+        "todo": "observation",
+        "main_target": true,
+        "secondary_targets": null,
+        "ra": "12:06:17.0",
+        "dec": "12:30:25.0",
+        "source_type": "exoplanet",
+        "nominal_obs_time_minutes": 480,
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 45.13043344444444,
+        "exposure_time_hours": 36.0,
+        "last_observation": "2025-02-02T13:00:00",
+        "off_beams": {
+            "option_1": [
+                {
+                    "ra": "12:04:59",
+                    "dec": "09:37:06"
+                },
+                {
+                    "ra": "12:01:52",
+                    "dec": "15:18:39"
+                },
+                {
+                    "ra": "11:56:47",
+                    "dec": "11:08:19"
                 }
             ]
         }

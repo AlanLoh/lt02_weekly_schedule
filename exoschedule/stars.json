@@ -840,5 +840,27 @@
                 }
             ]
         }
+    },
+    "BDR_J1750+3809": {
+        "real_name": "BDR_J1750+3809",
+        "todo": "observation",
+        "main_target": true,
+        "secondary_targets": null,
+        "ra": "17:50:01.1",
+        "dec": "38:09:19.5",
+        "source_type": "star",
+        "nominal_obs_time_minutes": 480,
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 16.499999999999996,
+        "last_observation": "2024-10-27T17:00:00",
+        "off_beams": {
+            "option_1": [
+                {
+                    "ra": "17:50:26",
+                    "dec": "40:59:36"
+                }
+            ]
+        }
     }
 }
