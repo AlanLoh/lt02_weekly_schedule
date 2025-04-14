@@ -235,10 +235,10 @@ def plot_schedule(schedule: Schedule, source_dict: dict, output_path: str, file_
 
     plt.close("all")
 
-    # days = np.unique([dd.split("T")[0] for dd in result["start"].isot])
-    # n_days = days.size
     dt_day = TimeDelta(1, format="jd")
-    n_days = int(np.ceil((schedule.time_max - schedule.time_min) / dt_day))
+    schedule_start = Time(f"{schedule.time_min.isot.split('T')[0]}T00:00:00")
+    schedule_stop = schedule.time_max if schedule.time_max.isot.split("T")[1].startswith("00:00:00") else Time(f"{(schedule.time_max + dt_day).isot.split('T')[0]}T00:00:00")
+    n_days = int(np.ceil((schedule_stop - schedule_start) / dt_day))
     days = np.array([(schedule.time_min + i * dt_day).isot.split("T")[0] for i in range(n_days)])
 
     fig, axs = plt.subplots(

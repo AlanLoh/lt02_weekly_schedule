@@ -76,7 +76,7 @@ def parse_arguments():
         help="Merge with exisiting booking"
     )
     parser.add_argument(
-        "-s", "--priority_source", nargs="*", required=False,
+        "-s", "--priority_source", nargs="*", required=False, default=[],
         help="Set these sources as priority targets"
     )
     args = parser.parse_args()
