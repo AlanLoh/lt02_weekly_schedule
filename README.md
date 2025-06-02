@@ -59,3 +59,6 @@ Here are all the available options:
 * `-o` (or `--output_path`): Where every result / parset will be written.
 * `-n` (or `--max_repetitions`): Maximum number of observations per target (default=2).
 * `-s` (or `--priority_source`): Set these sources as priority targets (e.g. `-s "GJ_687" "TOI-3884"`)
+* `-m` (or `--merge_existing_booking`): Merge the free slots with the already booked KP slots.
+* `-e` (or `--only_existing_booking`): Limit the booking to already booked KP slots.
+

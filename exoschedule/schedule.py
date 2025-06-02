@@ -213,6 +213,9 @@ def book_observations(booking_starts_stops: List[Tuple[Time, Time]], source_dict
         relative_score_threshold=0.5,
     )
 
+    results = schedule.export()
+    log.info(f"Schedule proposed:\n{results}")
+
     return schedule
 
 
@@ -567,7 +570,7 @@ def write_parset_file(schedule_row: Table, source_dict: dict, output_path: str, 
                 parameters=f"{config['parameters']}",
                 corAzel=corazel
             )
-    
+
     else:
         # Main
         parset.add_numerical_beam(

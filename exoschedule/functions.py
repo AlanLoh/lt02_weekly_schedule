@@ -54,6 +54,7 @@ def bookings_from_vcr(
         start_time: Time,
         stop_time: Time,
         merge_slots: bool = True,
+        only_kp_slots: bool = False,
         min_dt: TimeDelta = TimeDelta(60, format="sec")
     ) -> List[Tuple[Time, Time]]:
     """Computes a list of free booking slots from the current VCR booking schedule.
@@ -73,6 +74,8 @@ def bookings_from_vcr(
     merge_slots : bool
         If the vcr_current_booking already contains booking slots already assigned to the KP_CODE, merge them with the new ones.
         Otherwise consider them as already booked. By default True
+    only_kp_slots : bool
+        Restrict the booking to the already booked KP slots. If set to True, merge_slots argument is ignored. By default False
     min_dt : TimeDelta, optional
         Minimal time resolution of the booking time definition, by default TimeDelta(60, format="sec")
 
@@ -84,9 +87,15 @@ def bookings_from_vcr(
     
     # Get the reserved slots currently scheduled within the VCR
     booked_slots = ReservedBlock.from_VCR(vcr_current_booking)
-    if merge_slots:
+    if only_kp_slots:
+        log.info(f"Limiting the booking to already booked {KP_CODE} slots.")
+        # Only keeps slots belonging to the current KP
+        booked_slots = booked_slots.get(name=KP_CODE, operation=operator.eq)
+        # Produce the list of start and stop times and ignore the rest
+        return [(blk.time_min, blk.time_max) for blk in booked_slots if blk.is_within(start_time, stop_time)]
+    elif merge_slots:
         # Remove the slots for which the KP is already scheduled
-        booked_slots = booked_slots.get(name=KP_CODE, operation=operator.ne) 
+        booked_slots = booked_slots.get(name=KP_CODE, operation=operator.ne)
 
     # Generate an instance of Schedule at the min_dt resolution and 
     # in between start and stop times.
@@ -255,6 +264,7 @@ def _find_via_glob(data_path: str) -> List[str]:
     return directories
 
 def find_directories(*data_paths: str) -> List[str]:
+    """Limit datapath to /databf/<instr>/<kp>. Then the function will look for obs dir stored after <year>/<month>/*"""
     observations_by_path = []
     for path in data_paths:
         if os.path.isdir(path):

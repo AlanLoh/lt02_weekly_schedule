@@ -71,10 +71,14 @@ def parse_arguments():
         "-n", "--max_repetitions", type=int, required=False, default=2,
         help="Maximum number of observations per target."
     )
-    parser.add_argument(
-        "-m", "--merge_existing_booking", type=bool, required=False, default=False,
-        help="Merge with exisiting booking"
-    )
+    parser.add_argument("-m", "--merge_existing_booking", action="store_true", help="Merge with exisiting booking")
+    parser.add_argument("-nm", "--no-merge_existing_booking", dest="merge_existing_booking", action="store_false", help="Do not merge with exisiting booking (default)")
+    parser.set_defaults(merge_existing_booking=False)
+
+    parser.add_argument("-e", "--only_existing_booking", action="store_true", help="Constrain the booking on existing slots")
+    parser.add_argument("-ne", "--no-only_existing_booking", dest="only_existing_booking", action="store_false", help="Do not constrain the booking on existing slots (default)")
+    parser.set_defaults(only_existing_booking=False)
+
     parser.add_argument(
         "-s", "--priority_source", nargs="*", required=False, default=[],
         help="Set these sources as priority targets"
@@ -114,7 +118,8 @@ if __name__ == "__main__":
         vcr_current_booking=args.vcr_booking_csv,
         start_time=start_time,
         stop_time=stop_time,
-        merge_slots=args.merge_existing_booking
+        merge_slots=args.merge_existing_booking,
+        only_kp_slots=args.only_existing_booking
     )
 
     write_booking_file(
