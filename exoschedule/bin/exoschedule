@@ -5,6 +5,11 @@
 Example
 
     exoschedule -t0 2025-02-17T00:00:00 -t1 2025-02-24T00:00:00 -b /Users/aloh/Documents/Work/NenuFAR/LT02_Exoplanets/Weekly_Schedule/TESTS/2025-02-14_booking.csv -o /Users/aloh/Documents/Work/NenuFAR/LT02_Exoplanets/Weekly_Schedule/TESTS/
+    exoschedule -t0 2025-07-22T00:00:00 -t1 2025-07-29T00:00:00 -n 2 -b /Users/aloh/Documents/Work/NenuFAR/LT02_Exoplanets/Weekly_Schedule/TESTS/2025_july_week4/2025-07-21_booking.csv -o /Users/aloh/Documents/Work/NenuFAR/LT02_Exoplanets/Weekly_Schedule/TESTS/2025_july_week4/ -u
+
+    # if the booking file is already in output (-o)
+    exoschedule -t0 2025-07-29T00:00:00 -t1 2025-08-05T01:00:00 -n 2 -o /Users/aloh/Documents/Work/NenuFAR/LT02_Exoplanets/Weekly_Schedule/TESTS/2025_08_1/ -u
+
 """
 
 __author__ = "Alan Loh"
@@ -19,11 +24,11 @@ __all__ = [
 
 import argparse
 from astropy.time import Time
+import glob, os
 import logging
 log = logging.getLogger("exoschedule")
 
 from exoschedule.functions import (
-    clear_exposure_time,
     bookings_from_vcr,
     write_booking_file,
     get_exoplanet_dict,
@@ -60,8 +65,8 @@ def parse_arguments():
     parser.add_argument("-nu", "--no-update_data", dest="update_data", action="store_false", help="Do not update the exposure time in the JSON files.")
     parser.set_defaults(update_data=True)
     parser.add_argument(
-        "-b", "--vcr_booking_csv", type=str, required=True,
-        help="CSV booking file downloaded from the VCR."
+        "-b", "--vcr_booking_csv", type=str, required=False, default="",
+        help="CSV booking file downloaded from the VCR. By default, will search for '*booking.csv' in --output_path"
     )
     parser.add_argument(
         "-o", "--output_path", type=str, required=True,
@@ -92,6 +97,15 @@ def parse_arguments():
 if __name__ == "__main__":
 
     args = parse_arguments()
+
+    # Check that the VCR booking file is defined or try to find it 
+    if args.vcr_booking_csv == "":
+        booking_file = glob.glob(os.path.join(args.output_path, "*_booking.csv"))
+        if len(booking_file) != 1:
+            log.error(f"Impossible to find the VCR booking file '*._booking.csv' in {args.output_path}.")
+            raise FileNotFoundError("VCR booking file not found.")
+        args.vcr_booking_csv = booking_file[0]
+        log.info(f"Found booking file '{args.vcr_booking_csv}'.")
 
     # Read the source data
     exop = get_exoplanet_dict()
