@@ -2542,5 +2542,35 @@
                 }
             ]
         }
+    },
+    "EQ_PEG": {
+        "real_name": "EQ_PEG",
+        "todo": "observation",
+        "main_target": true,
+        "secondary_targets": null,
+        "ra": "23:31:52.1",
+        "dec": "19:56:14",
+        "source_type": "exoplanet",
+        "nominal_obs_time_minutes": 480,
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 52.560711222222224,
+        "exposure_time_hours": 49.93333333333333,
+        "last_observation": "2025-01-22T15:00:00",
+        "off_beams": {
+            "option_1": [
+                {
+                    "ra": "23:43:09",
+                    "dec": "21:27:51"
+                },
+                {
+                    "ra": "23:33:05",
+                    "dec": "16:56:50"
+                },
+                {
+                    "ra": "23:19:27",
+                    "dec": "21:13:15"
+                }
+            ]
+        }
     }
 }

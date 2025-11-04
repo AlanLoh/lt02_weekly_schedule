@@ -49,6 +49,11 @@ DATA_REPOSITORIES = (
     "/databf/nenufar/LT02"
 )
 
+# A team sources used for calibration purposes during imaging observations
+A_TEAM_SOURCES = ["Cas A", "Cyg A"]
+CALIBRATION_DURATION = TimeDelta(15 * 60, format="sec")
+IMAGING_MIN_DURATION = TimeDelta(2 * 3600, format="sec")
+
 # Disable the pointing correction for sources at declination > 60 deg
 DISABLE_POINTING_CORRECTION_DECLINATION = 60
 

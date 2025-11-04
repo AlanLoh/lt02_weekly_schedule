@@ -799,28 +799,6 @@
             ]
         }
     },
-    "EQ_PEG": {
-        "real_name": "EQ_PEG",
-        "todo": "observation",
-        "main_target": true,
-        "secondary_targets": null,
-        "ra": "23:31:52.1",
-        "dec": "19:56:14",
-        "source_type": "star",
-        "nominal_obs_time_minutes": 480,
-        "minimal_obs_time_minutes": 60,
-        "minimal_elevation": 52.560711222222224,
-        "exposure_time_hours": 49.93333333333333,
-        "last_observation": "2025-01-22T15:00:00",
-        "off_beams": {
-            "option_1": [
-                {
-                    "ra": "23:43:09",
-                    "dec": "21:27:51"
-                }
-            ]
-        }
-    },
     "II_PEG": {
         "real_name": "II_PEG",
         "todo": "observation",
@@ -861,6 +839,226 @@
                 {
                     "ra": "17:50:26",
                     "dec": "40:59:36"
+                }
+            ]
+        }
+    },
+    "ROSS_248": {
+        "real_name": "Ross 248",
+        "todo": "observation",
+        "main_target": true,
+        "secondary_targets": null,
+        "ra": "23:41:55",
+        "dec": "44:10:38.8",
+        "source_type": "star",
+        "nominal_obs_time_minutes": 480,
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 16.499999999999996,
+        "last_observation": "2000-01-01T00:00:00",
+        "off_beams": {
+            "option_1": [
+                {
+                    "ra": "23:35:22",
+                    "dec": "46:43:41"
+                }
+            ]
+        }
+    },
+    "MCC_351": {
+        "real_name": "MCC 351",
+        "todo": "observation",
+        "main_target": true,
+        "secondary_targets": null,
+        "ra": "00:08:27.3",
+        "dec": "17:25:27.5",
+        "source_type": "star",
+        "nominal_obs_time_minutes": 480,
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 16.499999999999996,
+        "last_observation": "2000-01-01T00:00:00",
+        "off_beams": {
+            "option_1": [
+                {
+                    "ra": "00:20:23",
+                    "dec": "16:29:43"
+                }
+            ]
+        }
+    },
+    "LP_298-45": {
+        "real_name": "LP 298-45",
+        "todo": "observation",
+        "main_target": true,
+        "secondary_targets": null,
+        "ra": "02:54:25.4",
+        "dec": "30:05:52.2",
+        "source_type": "star",
+        "nominal_obs_time_minutes": 480,
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 16.499999999999996,
+        "last_observation": "2000-01-01T00:00:00",
+        "off_beams": {
+            "option_1": [
+                {
+                    "ra": "02:54:24",
+                    "dec": "32:48:02"
+                }
+            ]
+        }
+    },
+    "LP_355-051": {
+        "real_name": "LP 355-051",
+        "todo": "observation",
+        "main_target": true,
+        "secondary_targets": null,
+        "ra": "03:17:45.2",
+        "dec": "25:15:06.4",
+        "source_type": "star",
+        "nominal_obs_time_minutes": 480,
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 16.499999999999996,
+        "last_observation": "2000-01-01T00:00:00",
+        "off_beams": {
+            "option_1": [
+                {
+                    "ra": "03:28:45",
+                    "dec": "27:00:31"
+                }
+            ]
+        }
+    },
+    "2MASS_J04555897+2140007": {
+        "real_name": "2MASS J04555897+2140007",
+        "todo": "observation",
+        "main_target": true,
+        "secondary_targets": null,
+        "ra": "04:55:59",
+        "dec": "21:40:00.7",
+        "source_type": "star",
+        "nominal_obs_time_minutes": 480,
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 16.499999999999996,
+        "last_observation": "2000-01-01T00:00:00",
+        "off_beams": {
+            "option_1": [
+                {
+                    "ra": "04:54:00",
+                    "dec": "24:30:17"
+                }
+            ]
+        }
+    },
+    "G_41-8": {
+        "real_name": "G 41-8",
+        "todo": "observation",
+        "main_target": true,
+        "secondary_targets": null,
+        "ra": "08:56:19.6",
+        "dec": "12:39:49.8",
+        "source_type": "star",
+        "nominal_obs_time_minutes": 480,
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 16.499999999999996,
+        "last_observation": "2000-01-01T00:00:00",
+        "off_beams": {
+            "option_1": [
+                {
+                    "ra": "08:50:01",
+                    "dec": "14:53:37"
+                }
+            ]
+        }
+    },
+    "NLTT_20670": {
+        "real_name": "NLTT 20670",
+        "todo": "observation",
+        "main_target": true,
+        "secondary_targets": null,
+        "ra": "08:58:56.3",
+        "dec": "08:28:26.0",
+        "source_type": "star",
+        "nominal_obs_time_minutes": 480,
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 16.499999999999996,
+        "last_observation": "2000-01-01T00:00:00",
+        "off_beams": {
+            "option_1": [
+                {
+                    "ra": "09:09:44",
+                    "dec": "08:07:09"
+                }
+            ]
+        }
+    },
+    "GJ_1134": {
+        "real_name": "GJ 1134",
+        "todo": "observation",
+        "main_target": true,
+        "secondary_targets": null,
+        "ra": "10:41:37.9",
+        "dec": "37:36:39.2",
+        "source_type": "star",
+        "nominal_obs_time_minutes": 480,
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 16.499999999999996,
+        "last_observation": "2000-01-01T00:00:00",
+        "off_beams": {
+            "option_1": [
+                {
+                    "ra": "10:45:39",
+                    "dec": "40:23:53"
+                }
+            ]
+        }
+    },
+    "BK_CrB": {
+        "real_name": "BK CrB",
+        "todo": "observation",
+        "main_target": true,
+        "secondary_targets": null,
+        "ra": "15:36:50.3",
+        "dec": "37:34:49.4",
+        "source_type": "star",
+        "nominal_obs_time_minutes": 480,
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 16.499999999999996,
+        "last_observation": "2000-01-01T00:00:00",
+        "off_beams": {
+            "option_1": [
+                {
+                    "ra": "15:24:30",
+                    "dec": "36:02:35"
+                }
+            ]
+        }
+    },
+    "HD_239960A": {
+        "real_name": "HD 239960A",
+        "todo": "observation",
+        "main_target": true,
+        "secondary_targets": null,
+        "ra": "22:27:59.6",
+        "dec": "57:41:42.1",
+        "source_type": "star",
+        "nominal_obs_time_minutes": 480,
+        "minimal_obs_time_minutes": 60,
+        "minimal_elevation": 60,
+        "exposure_time_hours": 16.499999999999996,
+        "last_observation": "2000-01-01T00:00:00",
+        "off_beams": {
+            "option_1": [
+                {
+                    "ra": "22:46:04",
+                    "dec": "56:14:32"
                 }
             ]
         }

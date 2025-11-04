@@ -21,7 +21,8 @@ dependencies = [
 
 [tool.setuptools]
 script-files = [
-    "exoschedule/bin/exoschedule"
+    "exoschedule/bin/exoschedule",
+    "exoschedule/bin/exoschedule-imaging"
 ]
 
 [tool.setuptools.packages.find]

@@ -4,23 +4,9 @@
 """
 Example
 
-    exoschedule -t0 2025-02-17T00:00:00 -t1 2025-02-24T00:00:00 -b /Users/aloh/Documents/Work/NenuFAR/LT02_Exoplanets/Weekly_Schedule/TESTS/2025-02-14_booking.csv -o /Users/aloh/Documents/Work/NenuFAR/LT02_Exoplanets/Weekly_Schedule/TESTS/
-    exoschedule -t0 2025-07-22T00:00:00 -t1 2025-07-29T00:00:00 -n 2 -b /Users/aloh/Documents/Work/NenuFAR/LT02_Exoplanets/Weekly_Schedule/TESTS/2025_july_week4/2025-07-21_booking.csv -o /Users/aloh/Documents/Work/NenuFAR/LT02_Exoplanets/Weekly_Schedule/TESTS/2025_july_week4/ -u
-
-    # if the booking file is already in output (-o)
-    exoschedule -t0 2025-09-30T00:00:00 -t1 2025-10-07T01:00:00 -n 2 -o /Users/aloh/Documents/Work/NenuFAR/LT02_Exoplanets/Weekly_Schedule/2025/2025-10-1/ -u
+    exoschedule-imaging -s ROSS_248 HD_189733 GJ_687 UPS_AND MCC_351 LP_355-051 YZ_CMI G_41-8 NLTT_20670 AD_LEO GJ_1134 BK_CrB HD_239960A EV_LAC EQ_PEG -t0 2025-10-28T00:00:00 -t1 2025-11-04T00:00:00 -n 2 -o /Users/aloh/Documents/Work/NenuFAR/LT02_Exoplanets/Weekly_Schedule/2025/2025-10-5_imaging/
 
 """
-
-__author__ = "Alan Loh"
-__copyright__ = "Copyright 2025, exoschedule"
-__credits__ = ["Alan Loh"]
-__maintainer__ = "Alan"
-__email__ = "alan.loh@obspm.fr"
-__status__ = "Production"
-__all__ = [
-    "parse_arguments"
-]
 
 import argparse
 from astropy.time import Time
@@ -32,23 +18,24 @@ from exoschedule.functions import (
     bookings_from_vcr,
     write_booking_file,
     get_exoplanet_dict,
-    get_star_dict,
-    update_exposure_time,
-    update_minimal_elevation
+    get_star_dict
 )
 from exoschedule.schedule import (
-    build_observation_blocks,
+    build_imaging_observation_blocks,
     book_observations,
     plot_schedule,
     write_parset_file
 )
-from exoschedule import DATA_REPOSITORIES
-
+from exoschedule import DATA_REPOSITORIES, IMAGING_MIN_DURATION
 
 # ============================================================= #
 # ---------------------- argument_parser ---------------------- #
 def parse_arguments():
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-s", "--sources", nargs="*", required=True,
+        help="Sources to observe"
+    )
     parser.add_argument(
         "-t0", "--time_min", type=str, required=True,
         help="Start time (UTC, ISOT format)."
@@ -57,13 +44,6 @@ def parse_arguments():
         "-t1", "--time_max", type=str, required=False,
         help="Stop time (UTC, ISOT format). If not user-defined, will be set to t0 + 7 days."
     )
-    # parser.add_argument(
-    #     "-u", "--update_data", type=bool, required=False, default=True,
-    #     help="Update the exposure time in the JSON files."
-    # )
-    parser.add_argument("-u", "--update_data", action="store_true", help="Update the exposure time in the JSON files.")
-    parser.add_argument("-nu", "--no-update_data", dest="update_data", action="store_false", help="Do not update the exposure time in the JSON files.")
-    parser.set_defaults(update_data=True)
     parser.add_argument(
         "-b", "--vcr_booking_csv", type=str, required=False, default="",
         help="CSV booking file downloaded from the VCR. By default, will search for '*booking.csv' in --output_path"
@@ -79,15 +59,9 @@ def parse_arguments():
     parser.add_argument("-m", "--merge_existing_booking", action="store_true", help="Merge with exisiting booking")
     parser.add_argument("-nm", "--no-merge_existing_booking", dest="merge_existing_booking", action="store_false", help="Do not merge with exisiting booking (default)")
     parser.set_defaults(merge_existing_booking=False)
-
     parser.add_argument("-e", "--only_existing_booking", action="store_true", help="Constrain the booking on existing slots")
     parser.add_argument("-ne", "--no-only_existing_booking", dest="only_existing_booking", action="store_false", help="Do not constrain the booking on existing slots (default)")
     parser.set_defaults(only_existing_booking=False)
-
-    parser.add_argument(
-        "-s", "--priority_source", nargs="*", required=False, default=[],
-        help="Set these sources as priority targets"
-    )
     args = parser.parse_args()
     return args
 
@@ -107,21 +81,6 @@ if __name__ == "__main__":
         args.vcr_booking_csv = booking_file[0]
         log.info(f"Found booking file '{args.vcr_booking_csv}'.")
 
-    # Read the source data
-    exop = get_exoplanet_dict()
-    star = get_star_dict()
-
-    # Update the source data, i.e. their exposure time
-    if args.update_data:
-        log.info("Updating the data repositories, this may take a few minutes if this is not already cached...")
-        log.info("Once it's done, you can shift+opt+f on a MacOS to make the JSON pretty ;)...")
-        # exop = clear_exposure_time(exop)
-        exop = update_exposure_time(exop, *DATA_REPOSITORIES, save=True)
-        # star = clear_exposure_time(star)
-        star = update_exposure_time(star, *DATA_REPOSITORIES, save=True)
-
-        exop = update_minimal_elevation(exop, save=True)
-        star = update_minimal_elevation(star, save=True)
 
     start_time = Time(args.time_min, format="isot")
     stop_time = Time(args.time_max, format="isot")
@@ -136,9 +95,16 @@ if __name__ == "__main__":
         only_kp_slots=args.only_existing_booking
     )
 
+    # Read the source data
+    exop = get_exoplanet_dict()
+    star = get_star_dict()
+
     # Define observation blocks
-    blocks = build_observation_blocks(exop)
-    blocks += build_observation_blocks(star)
+    blocks = build_imaging_observation_blocks(
+        source_dict={**exop, **star},
+        source_list=args.sources,
+        min_duration=IMAGING_MIN_DURATION
+    )
     blocks *= args.max_repetitions
 
     # Schedule the LT2 observations within the schedule
@@ -146,7 +112,8 @@ if __name__ == "__main__":
         booking_starts_stops=booking_slots,
         source_dict={**exop, **star},
         observation_blocks=blocks,
-        priority_sources=args.priority_source
+        priority_sources=args.sources,
+        release_duration=False # do not allow to shorten the minimal obs duration
     )
 
     plot_schedule(
@@ -170,7 +137,8 @@ if __name__ == "__main__":
             schedule_row=observation,
             source_dict={**exop, **star},
             output_path=args.output_path,
-            file_prefix=prefix
+            file_prefix=prefix,
+            add_imaging=True
         )
 # ============================================================= #
 # ============================================================= #

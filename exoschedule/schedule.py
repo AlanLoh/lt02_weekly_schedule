@@ -9,6 +9,7 @@ __email__ = "alan.loh@obspm.fr"
 __status__ = "Production"
 __all__ = [
     "build_observation_blocks",
+    "build_imaging_observation_blocks",
     "initialize_schedule",
     "sort_blocks_by_priorities",
     "book_observations",
@@ -24,7 +25,7 @@ from nenupy.schedule import (
     ESTarget,
     Constraints,
     ElevationCnst,
-    MeridianTransitCnst
+    NightTimeCnst
 )
 from nenupy.observation import ParsetUser
 from nenupy.astro.target import FixedTarget
@@ -40,7 +41,9 @@ from exoschedule import (
     OBSERVATION_CONFIGURATION,
     CONFIG_EXCEPTION,
     MIN_OBS_DURATION,
-    MIN_DURATION
+    MIN_DURATION,
+    A_TEAM_SOURCES,
+    CALIBRATION_DURATION
 )
 
 from astropy.time import Time, TimeDelta
@@ -60,20 +63,40 @@ log = logging.getLogger("exoschedule")
 
 # ============================================================= #
 # ----------------- build_observation_blocks ------------------ #
-def build_observation_blocks(source_dict: dict) -> ObsBlock:
+def build_observation_blocks(source_dict: dict, min_duration: TimeDelta = MIN_OBS_DURATION) -> ObsBlock:
     src_obs = sum([
         ObsBlock(
             name=src,
             program="LT02",
             target=ESTarget(SkyCoord(source_dict[src]["ra"], source_dict[src]["dec"], unit=(u.hourangle, u.deg))),
             # duration=TimeDelta(source_dict[src]["minimal_obs_time_minutes"] * 60, format="sec"),
-            duration=MIN_OBS_DURATION,
+            duration=min_duration,
             max_extended_duration=TimeDelta(source_dict[src]["nominal_obs_time_minutes"] * 60, format="sec"),
             constraints=Constraints(
                 ElevationCnst(elevationMin=source_dict[src]["minimal_elevation"] * u.deg, scale_elevation=True, weight=1),
                 # MeridianTransitCnst(weight=1)
             )
         ) for src in source_dict if source_dict[src]["main_target"] and (source_dict[src]["todo"] in ["observation"])
+    ])
+    return src_obs
+
+def build_imaging_observation_blocks(source_dict: dict, source_list: List[str], min_duration: TimeDelta = MIN_OBS_DURATION) -> ObsBlock:
+    source_names = list(source_dict.keys())
+    for source in source_list:
+        if source not in source_names:
+            raise ValueError(f"Source {source} not known. Check that it could be found in exoplanet or star JSON files.")
+    src_obs = sum([
+        ObsBlock(
+            name=src,
+            program="LT02",
+            target=ESTarget(SkyCoord(source_dict[src]["ra"], source_dict[src]["dec"], unit=(u.hourangle, u.deg))),
+            duration=min_duration,
+            max_extended_duration=TimeDelta(source_dict[src]["nominal_obs_time_minutes"] * 60, format="sec"),
+            constraints=Constraints(
+                ElevationCnst(elevationMin=source_dict[src]["minimal_elevation"] * u.deg, scale_elevation=True, weight=1),
+                NightTimeCnst(scale_elevation=False)
+            )
+        ) for src in source_list if source_dict[src]["main_target"] and (source_dict[src]["todo"] in ["observation"])
     ])
     return src_obs
 
@@ -177,7 +200,7 @@ def sort_blocks_by_priorities(source_dict: dict, schedule: Schedule, priority_so
 
 # ============================================================= #
 # --------------------- book_observations --------------------- #
-def book_observations(booking_starts_stops: List[Tuple[Time, Time]], source_dict: dict, observation_blocks: ObsBlock, priority_sources: List[str] = []) -> Schedule:
+def book_observations(booking_starts_stops: List[Tuple[Time, Time]], source_dict: dict, observation_blocks: ObsBlock, priority_sources: List[str] = [], release_duration: bool = True) -> Schedule:
 
     log.info("Booking the schedule...")
 
@@ -198,9 +221,10 @@ def book_observations(booking_starts_stops: List[Tuple[Time, Time]], source_dict
     )
 
     # At the second pass, allow for less duration observations
-    for obs_block in schedule.observation_blocks:
-        if not obs_block.isBooked:
-            obs_block.duration = MIN_DURATION
+    if release_duration:
+        for obs_block in schedule.observation_blocks:
+            if not obs_block.isBooked:
+                obs_block.duration = MIN_DURATION
 
     schedule.book(
         very_strict=False,
@@ -466,10 +490,39 @@ def is_night(start: Time, stop: Time) -> bool:
     else:
         return True
 
+# ============================================================= #
+# ------------------------ find_a_team ------------------------ #
+def find_a_team(time: Time) -> str:
+    """Return the A team source name that is at the highest elevation at time.
+
+    Parameters
+    ----------
+    time : Time
+        Time of observation.
+
+    Returns
+    -------
+    str
+        Name of the A team source
+    """
+    id_max_elevation = np.argmax([FixedTarget.from_name(a_team, time=time).horizontal_coordinates.alt.deg for a_team in A_TEAM_SOURCES])
+    return A_TEAM_SOURCES[id_max_elevation]
+
+# ============================================================= #
+# ----------------------- find_transit ------------------------ #
+def find_transit(target: FixedTarget, time: Time) -> Time:
+    transits = [
+        target.previous_meridian_transit(time=time).isot,
+        target.next_meridian_transit(time=time).isot
+    ]
+    transit_idx = np.argmin(np.abs(Time(transits) - time))
+    transit = Time(transits[transit_idx])
+    transit.precision = 0
+    return transit
 
 # ============================================================= #
 # --------------------- write_parset_file --------------------- #
-def write_parset_file(schedule_row: Table, source_dict: dict, output_path: str, file_prefix: str = "") -> None:
+def write_parset_file(schedule_row: Table, source_dict: dict, output_path: str, file_prefix: str = "", add_imaging: bool = False) -> None:
 
     source_name = schedule_row["name"]
     time_min = schedule_row["start"]
@@ -477,20 +530,34 @@ def write_parset_file(schedule_row: Table, source_dict: dict, output_path: str, 
 
     skycoord = SkyCoord(source_dict[source_name]["ra"], source_dict[source_name]["dec"], unit=(u.hourangle, u.deg))
 
-    # day_start_str = time_min.isot.split("T")[0]
     time_min.precision = 0
     time_max.precision = 0
     init_delta = TimeDelta(70, format="sec")
     end_dt = TimeDelta(60, format="sec")
 
+    # Find the transit source time
     source = FixedTarget(skycoord)
-    transits = [
-        source.previous_meridian_transit(time=time_min).isot,
-        source.next_meridian_transit(time=time_min).isot
-    ]
-    transit_idx = np.argmin(np.abs(Time(transits) - time_min))
-    transit = Time(transits[transit_idx])
-    transit.precision = 0
+    transit = find_transit(source, time_min)
+
+    # Consider time to make a calibration observation in case of imaging
+    if add_imaging:
+        cal_src_name = find_a_team(time_min)
+        # Check whether to observe it before or after
+        cal_src = FixedTarget.from_name(cal_src_name, time=Time([time_min.isot, time_max.isot], format="isot"))
+        alt_max_idx = np.argmax(cal_src.horizontal_coordinates.alt.deg)
+        if alt_max_idx == 0:
+            # Observation before
+            cal_time_min = time_min
+            time_min += CALIBRATION_DURATION + TimeDelta(60 * 2, format="sec")
+            time_min.precision = 0
+            cal_time_max = time_min
+        else:
+            # Observation after
+            cal_time_max = time_max
+            time_max -= CALIBRATION_DURATION + TimeDelta(60 * 2, format="sec")
+            time_max.precision = 0
+            cal_time_min = time_max
+        cal_transit = find_transit(cal_src, cal_time_min)
 
     parset = ParsetUser()
     obs = parset.observation
@@ -546,8 +613,8 @@ def write_parset_file(schedule_row: Table, source_dict: dict, output_path: str, 
     if source_dict[source_name]["secondary_targets"] is not None:
         for secondary_name in source_dict[source_name]["secondary_targets"]:
             secondary_source = source_dict[secondary_name]
-            skycoord = SkyCoord(secondary_source["ra"], secondary_source["dec"], unit=(u.hourangle, u.deg))
-            source = FixedTarget(skycoord)
+            skycoord_scd = SkyCoord(secondary_source["ra"], secondary_source["dec"], unit=(u.hourangle, u.deg))
+            source = FixedTarget(skycoord_scd)
             transits = [
                 source.previous_meridian_transit(time=time_min).isot,
                 source.next_meridian_transit(time=time_min).isot
@@ -592,8 +659,8 @@ def write_parset_file(schedule_row: Table, source_dict: dict, output_path: str, 
         # Add off beams
         off_beams = source_dict[source_name]["off_beams"]["option_1"]
         for off_beam in off_beams:
-            skycoord = SkyCoord(off_beam["ra"], off_beam["dec"], unit=(u.hourangle, u.deg))
-            source = FixedTarget(skycoord)
+            skycoord_off = SkyCoord(off_beam["ra"], off_beam["dec"], unit=(u.hourangle, u.deg))
+            source = FixedTarget(skycoord_off)
             transits = [
                 source.previous_meridian_transit(time=time_min).isot,
                 source.next_meridian_transit(time=time_min).isot
@@ -616,6 +683,58 @@ def write_parset_file(schedule_row: Table, source_dict: dict, output_path: str, 
                 parameters=f"{config['parameters']}",
                 corAzel=corazel
             )
+
+    if add_imaging:
+        imaging_freq = "[30.8-78.3]"
+        imaging_params = "env_file=env_dp3-5.2.sh avg_timestep=1 avg_freqstep=30 startchan=2 nchan=60 compress=true flag_strategy=nenufar64c1s.lua sws=[158-221,222-281,282-341,342-401] stat_pols=[snr_xx,snr_yy,rfipercentage_xx]"
+        cal_target = cal_src_name.replace(' ', "_").upper()
+
+        parset.add_phase_center(
+            target=main_target_name,
+            subbandFrq=imaging_freq,
+            useParentPointing=True,
+            parameters=imaging_params
+        )
+        output["nri_receivers"] = True
+
+        # Create the calibration parset
+        cal_parset = ParsetUser()
+        cal_obs = cal_parset.observation
+        cal_obs["name"] = f"{cal_target}_TRACKING"
+        cal_obs["contactName"] = "philippe.zarka"
+        cal_obs["title"] = source_type
+        cal_obs["contactEmail"] = "philippe.zarka@obspm.fr"
+        cal_obs["topic"] = "lt02_exoplanets_and_stars"
+        cal_output = cal_parset.output
+        cal_output["nri_receivers"] = True
+        cal_parset.add_analog_beam(
+            target=f"{cal_target}_TRACKING",
+            trackingType="tracking",
+            directionType="j2000",
+            ra=f"'{cal_src.coordinates.ra.to_string(unit='hour', sep=':')}'",
+            dec=f"'{cal_src.coordinates.dec.to_string(unit='degree', sep=':')}'",
+            startTime=(cal_time_min + init_delta).isot + "Z",
+            transitDate=cal_transit.isot + "Z",
+            filterStart=config["filter"],
+            optFrq=config["squint"],
+            corAzel=corazel,
+            duration=f"{int(np.round((cal_time_max - cal_time_min - init_delta - end_dt).sec))}s"
+        )
+        cal_parset.add_phase_center(
+            target=f"{cal_target}_TRACKING",
+            subbandFrq=imaging_freq,
+            useParentPointing=True,
+            parameters=imaging_params
+        )
+        tmin_str = cal_time_min.isot.replace(":", "").replace("-", "")
+        tmax_str = cal_time_max.isot.replace(":", "").replace("-", "")
+        cal_parset_name = os.path.join(
+            output_path,
+            f"{file_prefix}{tmin_str}_{tmax_str}_{cal_target}_calibration.parset_user"
+        )
+        cal_parset.write( cal_parset_name )
+        log.info(f"Parset '{cal_parset_name}' written.")
+    
 
     parset.output["hd_bitMode"] = 16
 
