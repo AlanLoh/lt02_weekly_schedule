@@ -9,6 +9,7 @@ __email__ = "alan.loh@obspm.fr"
 __status__ = "Production"
 __all__ = [
     "bookings_from_vcr",
+    "booking_difference",
     "write_booking_file",
     "get_exoplanet_dict",
     "get_star_dict",
@@ -17,7 +18,8 @@ __all__ = [
     "get_source_exposure_time",
     "update_exposure_time",
     "update_minimal_elevation",
-    "clear_exposure_time"
+    "clear_exposure_time",
+    "get_imaging_sources"
 ]
 
 
@@ -31,6 +33,7 @@ import os
 import glob
 import json
 import subprocess
+import copy
 import logging
 log = logging.getLogger("exoschedule")
 
@@ -43,7 +46,8 @@ from exoschedule import (
     MID_DAY_STOP_HOUR,
     KP_CODE,
     REMOTE_SERVER,
-    SPECIAL_CASES
+    SPECIAL_CASES,
+    IMAGING_SOURCES
 )
 
 
@@ -132,6 +136,43 @@ def bookings_from_vcr(
         free_bookings.append( (group_start, group_stop) )
 
     return free_bookings
+
+# ============================================================= #
+# -------------------- booking_difference --------------------- #
+def booking_difference(booking_1: List[Tuple[Time, Time]], booking_2: List[Tuple[Time, Time]]) -> List[Tuple[Time, Time]]:
+
+    booking_1 = copy.copy(booking_1)
+
+    for s2, e2 in booking_2:
+
+        tmp = []
+        idx_to_remove = []
+        for i, (s1, e1) in enumerate(booking_1):
+            # If the second booking is unrelated to the first, skip
+            if (e2 < s1) or (s2 > e1):
+                continue
+
+            # If the start is before, align them, same for end
+            if s2 < s1:
+                s2 = s1
+            if e2 > e1:
+                e2 = e1
+            
+            # Remove the previous booking and create as many more
+            idx_to_remove.append(i)
+
+            boundaries = np.array([s1, s2, e2, e1])
+            boundaries, counts = np.unique(boundaries, return_counts=True)
+            for start, stop in zip(*[iter(sorted(boundaries[counts == 1]))]*2):
+                tmp.append((start, stop))
+        
+        for idx in sorted(idx_to_remove)[::-1]:
+            del booking_1[idx]
+
+        for booking in tmp:
+            booking_1.append(booking)
+
+    return sorted(booking_1)
 
 
 # ============================================================= #
@@ -512,6 +553,21 @@ def clear_exposure_time(source_dict: dict, save: bool = False) -> dict:
         _modify_json_files(source_dict)
 
     return source_dict
+
+# ============================================================= #
+# -------------------- get_imaging_sources -------------------- #
+def get_imaging_sources(all_sources: dict, imaging_sources: List[str] = IMAGING_SOURCES) -> dict:
+
+    # Make sure the sources listed in IMAGING_SOURCES are known and present in all sources
+    for source in imaging_sources:
+        if source not in all_sources:
+            raise ValueError(f"Source '{source}' is not in the known source list.")
+
+    log.info(f"Imaging sources considered are: {imaging_sources}.")
+
+    # Filter out the dictionnary
+    return {source: all_sources[source] for source in imaging_sources}
+
 
 # # ============================================================= #
 # # -------------------- write_booking_file --------------------- #

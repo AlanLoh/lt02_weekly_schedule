@@ -16,7 +16,7 @@ import os
 import itertools
 from astropy.time import Time
 
-from exoschedule.functions import bookings_from_vcr
+from exoschedule.functions import bookings_from_vcr, booking_difference
 
 # ============================================================= #
 # ------------------ test_bookings_from_vcr ------------------- #
@@ -124,3 +124,40 @@ def test_bookings_from_vcr_unmerged():
     ]
     actual = list(itertools.chain(*[[res[0].isot, res[1].isot] for res in result]))
     assert all([a == b for a, b in zip(actual, expected)])
+
+
+# ============================================================= #
+# ------------------ test_booking_difference ------------------ #
+def test_booking_difference():
+    b1 = [
+        (Time("2025-01-01 00:00:00"), Time("2025-01-01 01:00:00")), # 1
+        (Time("2025-01-01 03:00:00"), Time("2025-01-01 05:00:00")), # 2
+        (Time("2025-01-01 06:00:00"), Time("2025-01-01 07:00:00")), # 3
+        (Time("2025-01-01 08:00:00"), Time("2025-01-01 09:00:00")) # 4
+    ]
+    b2 = [
+        (Time("2025-01-01 00:10:00"), Time("2025-01-01 00:20:00")), # within 1
+        (Time("2025-01-01 01:10:00"), Time("2025-01-01 01:20:00")), # outside
+        (Time("2025-01-01 03:10:00"), Time("2025-01-01 03:20:00")), # within 2
+        (Time("2025-01-01 04:10:00"), Time("2025-01-01 04:20:00")), # within 2 bis
+        (Time("2025-01-01 05:50:00"), Time("2025-01-01 06:10:00")), # intersecting 3 low edge
+        (Time("2025-01-01 07:50:00"), Time("2025-01-01 09:10:00")) # completely englobing 4
+        ]
+
+    expected = [
+        ("2025-01-01T00:00:00.000", "2025-01-01T00:10:00.000"),
+        ("2025-01-01T00:20:00.000", "2025-01-01T01:00:00.000"),
+        ("2025-01-01T03:00:00.000", "2025-01-01T03:10:00.000"),
+        ("2025-01-01T03:20:00.000", "2025-01-01T04:10:00.000"),
+        ("2025-01-01T04:20:00.000", "2025-01-01T05:00:00.000"),
+        ("2025-01-01T06:10:00.000", "2025-01-01T07:00:00.000"),
+    ]
+
+    actual = booking_difference(
+        b1,
+        b2
+    )
+    actual = [(s.isot, e.isot) for s, e in sorted(actual)]
+
+    for a, e in zip(actual, expected):
+        assert a == e, f"{a} != {e}"

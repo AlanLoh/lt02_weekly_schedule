@@ -2,7 +2,7 @@ __author__ = "Alan Loh"
 __copyright__ = "Copyright 2025, exoschedule"
 __credits__ = ["Alan Loh"]
 __license__ = "MIT"
-__version__ = "1.1.1"
+__version__ = "1.2.0"
 __maintainer__ = "Alan Loh"
 __email__ = "alan.loh@obspm.fr"
 
@@ -53,6 +53,59 @@ DATA_REPOSITORIES = (
 A_TEAM_SOURCES = ["Cas A", "Cyg A"]
 CALIBRATION_DURATION = TimeDelta(15 * 60, format="sec")
 IMAGING_MIN_DURATION = TimeDelta(2 * 3600, format="sec")
+
+IMAGING_SOURCES = [
+    "ROSS_248",
+    "HD_189733",
+    "GJ_687",
+    "UPS_AND",
+    "MCC_351",
+    "LP_355-051",
+    "YZ_CMI",
+    "G_41-8",
+    "NLTT_20670",
+    "AD_LEO",
+    "GJ_1134",
+    "BK_CrB",
+    "HD_239960A",
+    "EV_LAC",
+    "EQ_PEG"
+]
+# Mail 12 novembre 2025 17:20
+# Les cibles Carmenes:
+# Nom			RA			Dec
+# MCC_351	00:08:27.3	+17:25:27.5
+# LP_355-051	03:17:45.2	+25:15:06.4
+# YZ_CMI		07:44:40.1	+03:33:08.9
+# G_41-8		08:56:19.6	+12:39:49.8
+# NLTT_20670	08:58:56.3	+08:28:26.0
+# AD_LEO		10:19:36.2	+19:52:12.1
+# GJ_1134		10:41:37.9	+37:36:39.2
+# BK_CrB		15:36:50.3	+37:34:49.4
+# HD_239960A	22:27:59.6	+57:41:42.1
+# EV_LAC		22:46:49.6	+44:20:02.3
+# EQ_PEG		23:31:52.1	+19:56:14
+
+# Les cibles détectées par Xiang avec NenuFAR:
+# UPS AND
+# GJ 687 (same stellar rotation phase as Cyril’s detection)
+# Ross 248 (brightest - 15 sigma detection - definitely resolved structure in burst)
+# HAT-P-36 (two bursts with reversed polarimetry; suspicious due to terrible data quality - bad weather)
+# 2MASS J04555897+2140007 (Resolved structure in burst)
+# LP 298-45 (Potentially resolved structure)
+# LSPM J1937+1747
+# 2MASS J16071984+4801293
+# 2MASS J22152477+3506576
+# 2MASS J01220158+4943248
+# 2MASS J09381115+4913012
+# SDSS J101353.96+500359.5
+# Unknown source 16:17:06.579 +68:55:51.168 (no M dwarf in pencil beam)
+
+# Les cibles observés avec FAST:
+# WISEPJ1122	11:22:54.70	+25:50:21.5
+# BDR_J1750	17:50:00.00	+38:09:00.0
+# Eps_Eri		03:32:55.84	-09:27:29.7
+# GJ1151		11:50:57.72	+48:22:38.5
 
 # Disable the pointing correction for sources at declination > 60 deg
 DISABLE_POINTING_CORRECTION_DECLINATION = 60

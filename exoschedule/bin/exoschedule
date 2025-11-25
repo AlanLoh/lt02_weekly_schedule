@@ -10,6 +10,10 @@ Example
     # if the booking file is already in output (-o)
     exoschedule -t0 2025-09-30T00:00:00 -t1 2025-10-07T01:00:00 -n 2 -o /Users/aloh/Documents/Work/NenuFAR/LT02_Exoplanets/Weekly_Schedule/2025/2025-10-1/ -u
 
+    # Adding imaging
+    exoschedule -t0 2025-11-25T00:00:00 -t1 2025-12-02T00:00:00 -n 2 -i -o /Users/aloh/Documents/Work/NenuFAR/LT02_Exoplanets/Weekly_Schedule/2025/2025-11-4_test -u
+
+
 """
 
 __author__ = "Alan Loh"
@@ -30,19 +34,22 @@ log = logging.getLogger("exoschedule")
 
 from exoschedule.functions import (
     bookings_from_vcr,
+    booking_difference,
     write_booking_file,
     get_exoplanet_dict,
     get_star_dict,
     update_exposure_time,
-    update_minimal_elevation
+    update_minimal_elevation,
+    get_imaging_sources
 )
 from exoschedule.schedule import (
     build_observation_blocks,
     book_observations,
     plot_schedule,
-    write_parset_file
+    write_parset_file,
+    build_imaging_observation_blocks
 )
-from exoschedule import DATA_REPOSITORIES
+from exoschedule import DATA_REPOSITORIES, IMAGING_MIN_DURATION, IMAGING_SOURCES
 
 
 # ============================================================= #
@@ -87,6 +94,13 @@ def parse_arguments():
     parser.add_argument(
         "-s", "--priority_source", nargs="*", required=False, default=[],
         help="Set these sources as priority targets"
+    )
+    parser.add_argument("-i", "--add_imaging", action="store_true", help="Add imaging observations.")
+    parser.add_argument("-ni", "--no-add_imaging", dest="add_imaging", action="store_false", help="Do not add imaging observations.")
+    parser.set_defaults(add_imaging=False)
+    parser.add_argument(
+        "-si", "--imaging_sources", nargs="*", required=False, default=[],
+        help="Add these sources in imaging mode"
     )
     args = parser.parse_args()
     return args
@@ -136,6 +150,58 @@ if __name__ == "__main__":
         only_kp_slots=args.only_existing_booking
     )
 
+    # Add imaging data
+    if args.add_imaging:
+        imaging_sources = list(set(IMAGING_SOURCES + args.imaging_sources))
+
+        imaging_source_dict = get_imaging_sources(
+            all_sources={**exop, **star},
+            imaging_sources=imaging_sources
+        )
+
+        # Define imaging observation blocks
+        imaging_blocks = build_imaging_observation_blocks(
+            source_dict=imaging_source_dict,
+            source_list=imaging_sources,
+            min_duration=IMAGING_MIN_DURATION
+        )
+        imaging_blocks *= args.max_repetitions
+
+        # Schedule the LT2 imaging observations within the schedule
+        scheduled_imaging_observations = book_observations(
+            booking_starts_stops=booking_slots,
+            source_dict=imaging_source_dict,
+            observation_blocks=imaging_blocks,
+            priority_sources=args.priority_source,
+            release_duration=False # do not allow to shorten the minimal obs duration
+        )
+
+        plot_schedule(
+            schedule=scheduled_imaging_observations,
+            source_dict=imaging_source_dict,
+            output_path=args.output_path,
+            file_prefix=prefix + "imaging_"
+        )
+
+        imaging_results = scheduled_imaging_observations.export()
+        imaging_observation_slots = [(obs["start"], obs["stop"]) for obs in imaging_results]
+
+        # Update the available bookings
+        booking_slots = booking_difference(booking_slots, imaging_observation_slots)
+
+        for observation in imaging_results:
+            write_parset_file(
+                schedule_row=observation,
+                source_dict=imaging_source_dict,
+                output_path=args.output_path,
+                file_prefix=prefix,
+                add_imaging=True
+            )
+        
+        del scheduled_imaging_observations
+    else:
+        imaging_observation_slots = []
+
     # Define observation blocks
     blocks = build_observation_blocks(exop)
     blocks += build_observation_blocks(star)
@@ -160,7 +226,7 @@ if __name__ == "__main__":
 
     observation_slots = [(obs["start"], obs["stop"]) for obs in results]
     write_booking_file(
-        booking_starts_stops=observation_slots,
+        booking_starts_stops=sorted(observation_slots + imaging_observation_slots),
         output_path=args.output_path,
         file_prefix=prefix
     )
