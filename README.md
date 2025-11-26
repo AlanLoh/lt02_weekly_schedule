@@ -26,6 +26,7 @@ Once in your environment, install the required python modules (others may be req
 ```
 pip install nenupy --upgrade
 pip install matplotlib
+pip install ics openpyxl
 ```
 
 Install the LT02 scheduling package:
@@ -65,3 +66,8 @@ Here are all the available options:
 * `-i` (or `--add_imaging`): Add imaging observations (during night time, with a predefined list).
 * `-si` (or `--imaging_sources`): Add these sources to the imaging list (e.g., `-si ROSS_248 HD_189733`)
 
+Access to help on parameters
+
+```
+exoschedule -h
+```
