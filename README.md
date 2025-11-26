@@ -6,8 +6,9 @@
 
 The first step is to create a virtual environment in which all the python modules will be installed cleanly (e.g. `<name_of_virtual_env> = alan_python312`). In your home directory in nancep:
 ```
-python3 -m venv .pyenv/versions/<name_of_virtual_env>
+python3.8 -m venv .pyenv/versions/<name_of_virtual_env>
 ```
+(We recommend using Python 3.8 on nancep.)
 
 This environment can be activated deactivated using:
 ```
@@ -46,7 +47,7 @@ VCR -> Schedule -> "Current Booking.csv"
 From anywhere
 
 ```
-exoschedule -t0 2025-04-02T00:00:00 -t1 2025-04-08T00:00:00 -n 2 -b <path_to_vcr_booking.csv> -o <path_to_store_the_results> -u
+exoschedule -t0 2025-04-02T00:00:00 -t1 2025-04-08T00:00:00 -n 2 -i -b <path_to_vcr_booking.csv> -o <path_to_store_the_results> -u
 ```
 
 ### Options
@@ -58,7 +59,9 @@ Here are all the available options:
 * `-b` (or `--vcr_booking_csv`): CSV booking file downloaded from the VCR.
 * `-o` (or `--output_path`): Where every result / parset will be written.
 * `-n` (or `--max_repetitions`): Maximum number of observations per target (default=2).
-* `-s` (or `--priority_source`): Set these sources as priority targets (e.g. `-s "GJ_687" "TOI-3884"`)
+* `-s` (or `--priority_source`): Set these sources as priority targets (e.g. `-s GJ_687 TOI-3884`)
 * `-m` (or `--merge_existing_booking`): Merge the free slots with the already booked KP slots.
 * `-e` (or `--only_existing_booking`): Limit the booking to already booked KP slots.
+* `-i` (or `--add_imaging`): Add imaging observations (during night time, with a predefined list).
+* `-si` (or `--imaging_sources`): Add these sources to the imaging list (e.g., `-si ROSS_248 HD_189733`)
 
