@@ -15,11 +15,14 @@ __all__ = [
     "get_star_dict",
     "obsid_to_timerange",
     "get_source_directories",
+    "get_anabeam_pointing",
+    "get_piggyback_directories",
     "get_source_exposure_time",
     "update_exposure_time",
     "update_minimal_elevation",
     "clear_exposure_time",
-    "get_imaging_sources"
+    "get_imaging_sources",
+    "is_imaging_observation"
 ]
 
 
@@ -39,6 +42,7 @@ log = logging.getLogger("exoschedule")
 
 from nenupy.schedule import Schedule, ReservedBlock
 from nenupy.astro.target import FixedTarget
+from nenupy.observation import Parset
 
 from exoschedule import (
     MIN_DURATION,
@@ -352,6 +356,79 @@ def get_source_directories(source_name: str, observation_directories: List[str])
 
     return directories
 
+
+# ============================================================= #
+# ------------------- get_anabeam_pointing -------------------- #
+def get_anabeam_pointing(observation_directory: str) -> SkyCoord:
+    """Returns the central pointing of the first analog beam.
+    If no parset can be found or if the analog beam if not a J2000 tracking None is returned.
+
+    Parameters
+    ----------
+    observation_directory : str
+        Observation diretory where the parset can be found.
+
+    Returns
+    -------
+    SkyCoord
+        The central poiting of the first analog beam
+    """
+    try:
+        parset_file = glob.glob(os.path.join(observation_directory, "*.parset"))[0]
+    except:
+        log.warning(f"No parset found in {observation_directory}.")
+        return None
+
+    parset = Parset(parset_file)
+
+    if parset.anabeams[0]["directionType"] != "j2000":
+        log.warning(f"Non-J2000 observation in {observation_directory}.")
+        return None
+
+    return SkyCoord(
+        ra=parset.anabeams[0]["angle1"],
+        dec=parset.anabeams[0]["angle2"],
+        unit="deg"
+    )
+
+# ============================================================= #
+# ----------------- get_piggyback_directories ------------------ #
+def get_piggyback_directories(source_name: str, observation_directories: List[str], search_radius: u.Quantity = 8 * u.deg) -> List[str]:
+    """Return the list of directories corresponding to observations whose first analog beam contain source_name.
+
+    Parameters
+    ----------
+    source_name : str
+        Name of the source to look for
+    observation_directories : List[str]
+        Directories, containing parset files, to check whether they may contain data on source_name
+    search_radius : u.Quantity, optional
+        Search radius from the analog beam center, by default 8*u.deg, corresponding to the Half Width at Half Maximum of NenuFAR MA primary beam (i.e. NenuFAR field of view)
+
+    Returns
+    -------
+    List[str]
+        List of observation directories that may contain data on source_name
+    """
+
+    sources_dict = {**get_exoplanet_dict(), **get_star_dict()}
+    if source_name not in sources_dict:
+        raise ValueError(f"Unable to find the source '{source_name}'.")
+
+    source_position = SkyCoord(
+        ra=sources_dict[source_name]["ra"],
+        dec=sources_dict[source_name]["dec"],
+        unit=(u.hourangle, u.deg)
+    )
+
+    piggyback_directories = []
+    for obs_dir in observation_directories:
+        anabeam_pointing = get_anabeam_pointing(observation_directory=obs_dir)
+        if anabeam_pointing.separation(source_position).deg <= search_radius.to_value(u.deg):
+            piggyback_directories.append(obs_dir)
+
+    return piggyback_directories
+
 # ============================================================= #
 # ----------------- get_source_exposure_time ------------------ #
 def get_source_exposure_time(source_name: str, observation_directories: List[str]) -> TimeDelta:
@@ -362,6 +439,7 @@ def get_source_exposure_time(source_name: str, observation_directories: List[str
     ----------
     source_name : str
         The name of the source as it should appear in the JSON file
+        If None, the exposure time is computed as the sum of all observation_directories exposure times.
     observation_directories : List[str]
         List of observation directories such as returned by find_directories()
 
@@ -370,10 +448,13 @@ def get_source_exposure_time(source_name: str, observation_directories: List[str
     TimeDelta
         The exposure time on source_name
     """
-    directories = get_source_directories(
-        source_name=source_name,
-        observation_directories=observation_directories
-    )
+    if source_name is None:
+        directories = observation_directories
+    else:
+        directories = get_source_directories(
+            source_name=source_name,
+            observation_directories=observation_directories
+        )
 
     # Computing the cumulative exposure time
     exposure_time = TimeDelta(0, format="sec")
@@ -567,6 +648,32 @@ def get_imaging_sources(all_sources: dict, imaging_sources: List[str] = IMAGING_
 
     # Filter out the dictionnary
     return {source: all_sources[source] for source in imaging_sources}
+
+
+# ============================================================= #
+# ------------------- is_imaging_observation ------------------ #
+def is_imaging_observation(observation_directory: str) -> bool:
+    """Check whether the observation contains imaging configuration.
+
+    Parameters
+    ----------
+    observation_directory : str
+        The observation directory to check, it must contain a parset file.
+
+    Returns
+    -------
+    bool
+        Whether a phase center has been configured or not
+    """
+    try:
+        parset_file = glob.glob(os.path.join(observation_directory, "*.parset"))[0]
+    except:
+        log.warning(f"No parset found in {observation_directory}.")
+        return None
+
+    parset = Parset(parset_file)
+
+    return len(parset.phase_centers) != 0
 
 
 # # ============================================================= #
