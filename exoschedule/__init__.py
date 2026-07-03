@@ -2,13 +2,14 @@ __author__ = "Alan Loh"
 __copyright__ = "Copyright 2025, exoschedule"
 __credits__ = ["Alan Loh"]
 __license__ = "MIT"
-__version__ = "1.3.0"
+__version__ = "1.4.0"
 __maintainer__ = "Alan Loh"
 __email__ = "alan.loh@obspm.fr"
 
 
 import logging
 import sys
+import os
 from astropy.time import TimeDelta
 
 # ============================================================= #
@@ -210,5 +211,10 @@ SPECIAL_CASES = {
         "exclude": []
     } 
 }
+
+LAST_CHECK_JSON = os.path.join(
+    os.path.dirname(__file__),
+    "last_check.json"
+)
 # ============================================================= #
 # ============================================================= #

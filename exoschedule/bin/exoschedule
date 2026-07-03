@@ -38,6 +38,7 @@ from exoschedule.functions import (
     get_exoplanet_dict,
     get_star_dict,
     update_exposure_time,
+    update_exposure_time_from_last,
     update_minimal_elevation,
     get_imaging_sources
 )
@@ -129,9 +130,11 @@ if __name__ == "__main__":
         log.info("Updating the data repositories, this may take a few minutes if this is not already cached...")
         log.info("Once it's done, you can shift+opt+f on a MacOS to make the JSON pretty ;)...")
         # exop = clear_exposure_time(exop)
-        exop = update_exposure_time(exop, *DATA_REPOSITORIES, save=True)
+        # exop = update_exposure_time(exop, *DATA_REPOSITORIES, save=True)
+        exop = update_exposure_time_from_last(exop, *DATA_REPOSITORIES, save=True)
         # star = clear_exposure_time(star)
-        star = update_exposure_time(star, *DATA_REPOSITORIES, save=True)
+        # star = update_exposure_time(star, *DATA_REPOSITORIES, save=True)
+        star = update_exposure_time_from_last(star, *DATA_REPOSITORIES, save=True)
 
         exop = update_minimal_elevation(exop, save=True)
         star = update_minimal_elevation(star, save=True)

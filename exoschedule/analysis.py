@@ -59,22 +59,24 @@ def source_statistics(sources: List[str], data_path: str, time_min: Time = None,
         
         results[source]["exposure_time"] = get_source_exposure_time(
             source_name=source,
-            observation_directories=obs_directories
+            observation_directories=obs_directories_filtered
         )
 
         results[source]["n_observations"] = len(
             get_source_directories(
                 source_name=source,
-                observation_directories=obs_directories
+                observation_directories=obs_directories_filtered
             )
         )
 
         piggyback_directories = get_piggyback_directories(
             source_name=source,
             search_radius=8 * u.deg, # ~NenuFAR MA HWHM at 50 MHz
-            observation_directories=obs_directories
+            observation_directories=obs_directories_filtered
         )
         results[source]["exposure_time_piggyback"] = get_source_exposure_time(
             source_name=None, # if None, compute the full exposure of the selected directories
             observation_directories=piggyback_directories
         )
+
+    return results

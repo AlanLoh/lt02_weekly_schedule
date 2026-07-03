@@ -8,6 +8,10 @@ __maintainer__ = "Alan"
 __email__ = "alan.loh@obspm.fr"
 __status__ = "Production"
 __all__ = [
+    "read_last_check",
+    "last_check",
+    "update_last_check",
+    "reset_last_check",
     "bookings_from_vcr",
     "booking_difference",
     "write_booking_file",
@@ -51,8 +55,56 @@ from exoschedule import (
     KP_CODE,
     REMOTE_SERVER,
     SPECIAL_CASES,
-    IMAGING_SOURCES
+    IMAGING_SOURCES,
+    LAST_CHECK_JSON
 )
+
+
+# ============================================================= #
+# ---------------------- read_last_check ---------------------- #
+def read_last_check() -> dict:
+    with open(LAST_CHECK_JSON, "r") as rfile:
+        last_check_info = json.load(rfile)
+    return last_check_info
+
+
+# ============================================================= #
+# ------------------------ last_check ------------------------- #
+def last_check() -> Time:
+    infos = read_last_check()
+    return Time(infos["last_timestamp"])
+
+
+# ============================================================= #
+# --------------------- update_last_check --------------------- #
+def update_last_check(last_observation_checked: str) -> None:
+
+    log.info(f"Updating '{LAST_CHECK_JSON}'...")
+
+    last_check_info = read_last_check()
+    
+    obs_start, obs_stop = obsid_to_timerange(last_observation_checked)
+
+    last_check_info["date_last_check"] = Time.now().isot
+    last_check_info["last_observation"] = os.path.basename(last_observation_checked)
+    last_check_info["last_timestamp"] = obs_stop.isot
+
+    with open(LAST_CHECK_JSON, "w") as wfile:
+        json.dump(last_check_info, wfile)
+
+
+# ============================================================= #
+# --------------------- reset_last_check --------------------- #
+def reset_last_check() -> None:
+    log.info(f"Resetting '{LAST_CHECK_JSON}'...")
+
+    last_check_info = {}
+    last_check_info["date_last_check"] = "2000-01-01T00:00:00"
+    last_check_info["last_observation"] = ""
+    last_check_info["last_timestamp"] = "2000-01-01T00:00:00"
+
+    with open(LAST_CHECK_JSON, "w") as wfile:
+        json.dump(last_check_info, wfile)
 
 
 # ============================================================= #
@@ -285,42 +337,100 @@ def obsid_to_timerange(observation_repository: str) -> Tuple[Time, Time]:
 
 # ============================================================= #
 # ------------------ find_source_directories ------------------ #
-def _find_via_ssh(data_path: str) -> List[str]:
+def _find_via_ssh(data_path: str, from_time: Time = None) -> List[str]:
     log.info(f"Searching for observations in '{data_path}' via SSH to {REMOTE_SERVER}...")
+
+    depth = 3
+
+    def add_month(time: Time) -> Time:
+        ymd = time.ymdhms
+        ymd["month"] += 1
+        if ymd["month"] == 13:
+            ymd["month"] = 1
+            ymd["year"] += 1
+        return Time(ymd, format="ymdhms")
+
+    if not (from_time is None):
+        current_time = from_time
+        data_paths = [os.path.join(os.path.join(data_path, f"{current_time.ymdhms['year']}"), f"{current_time.ymdhms['month']:02d}")]
+        current_time = add_month(current_time)
+        while current_time < Time.now():
+            data_paths.append(os.path.join(os.path.join(data_path, f"{current_time.ymdhms['year']}"), f"{current_time.ymdhms['month']:02d}"))
+            current_time = add_month(current_time)
+        data_path = " ".join(sorted(data_paths))
+        depth = 1
+
     commands = [
-        f"ssh {REMOTE_SERVER} 'find {data_path} -mindepth 3 -maxdepth 3 -type d'"
+        f"ssh {REMOTE_SERVER} 'find {data_path} -mindepth {depth} -maxdepth {depth} -type d'"
     ]
+
     proc = subprocess.Popen("; ".join(commands), shell=True, stdout=subprocess.PIPE, executable="/bin/bash")
     stdout, stderr = proc.communicate()
     exitcode = proc.returncode
-    observation_directories =  stdout.decode("utf-8").split("\n")[:-1]
+    observation_directories = sorted(stdout.decode("utf-8").split("\n")[:-1])
+    
+    if not (from_time is None):
+        from_time_epsilon = from_time - TimeDelta(1, format="sec")
+        i = 0
+        for i, observation in enumerate(observation_directories):
+            _, obs_stop = obsid_to_timerange(observation)
+            if obs_stop < from_time_epsilon:
+                continue
+            else:
+                break
+        observation_directories = observation_directories[i:]
+    
     return observation_directories
 
-def _find_via_glob(data_path: str) -> List[str]:
+def _find_via_glob(data_path: str, from_time: Time = None) -> List[str]:
     log.info(f"Searching for observations in '{data_path}' locally...")
+    
+    year = 2000
+    month = 0
+    select_from_time = False
+    if not (from_time is None):
+        from_time_epsilon = from_time - TimeDelta(1, format="sec")
+        # Look for data starting from the selected year and month
+        year = int(from_time.isot[:4])
+        month = int(from_time.isot[5:7])
+        select_from_time = True
+
     directories = []
+
     year_paths = glob.glob(os.path.join(data_path, "*"))
     for year_path in sorted(year_paths):
+        if int(os.path.basename(year_path)) < year:
+            continue
         month_paths = glob.glob(os.path.join(year_path, "*"))
         for month_path in sorted(month_paths):
+            if int(os.path.basename(month_path)) < month:
+                continue
             observations = glob.glob(os.path.join(month_path, "*"))
             for observation in sorted(observations):
+                if select_from_time:
+                    _, obs_stop = obsid_to_timerange(observation)
+                    if obs_stop < from_time_epsilon:
+                        continue
                 directories.append(observation)
+
     return directories
 
-def find_directories(*data_paths: str) -> List[str]:
+def find_directories(*data_paths: str, from_time: Time = None) -> List[str]:
     """Limit datapath to /databf/<instr>/<kp>. Then the function will look for obs dir stored after <year>/<month>/*"""
+    if not (from_time is None):
+        log.info(f"Updating exposure time since last check on {from_time.isot}")
+
     observations_by_path = []
     for path in data_paths:
         if os.path.isdir(path):
             # The data are local
             observations_by_path.append(
-                _find_via_glob(data_path=path)
+                _find_via_glob(data_path=path, from_time=from_time)
             )
         else:
             # Remote connexion using REMOTE_SERVER
             observations_by_path.append(
-                _find_via_ssh(data_path=path)
+                _find_via_ssh(data_path=path, from_time=from_time)
             )
     return sum(observations_by_path, [])
 
@@ -424,6 +534,9 @@ def get_piggyback_directories(source_name: str, observation_directories: List[st
     piggyback_directories = []
     for obs_dir in observation_directories:
         anabeam_pointing = get_anabeam_pointing(observation_directory=obs_dir)
+        if anabeam_pointing is None:
+            # The pointing could not be computed
+            continue
         if anabeam_pointing.separation(source_position).deg <= search_radius.to_value(u.deg):
             piggyback_directories.append(obs_dir)
 
@@ -555,6 +668,59 @@ def update_exposure_time(source_dict: dict, *data_paths: str, save: bool = False
             log.info(f"{src}: DT={(current_exposure_time - previous_exposure_time)}h added.")
 
     if save:
+        _modify_json_files(source_dict)
+    
+    return source_dict
+
+
+# ============================================================= #
+# -------------- update_exposure_time_from_last --------------- #
+def update_exposure_time_from_last(source_dict: dict, *data_paths: str, save: bool = False) -> dict:
+    """Update the exposure time of every source in source_dict with observations found in datapath.
+    Only observations with a stop time after the last check are considered.
+    For every source get_source_exposure_time() is called: the data repository names are parsed to figure out the exposure time from the obsid.
+
+    Parameters
+    ----------
+    source_dict : dict
+        The source dictionnary (such as returned by get_exoplanet_dict() for instance)
+    data_paths : str
+        The path(s) where all the data repositories are
+    save : bool, optional
+        If True the JSON files are updated with the new exposure times, by default False
+
+    Returns
+    -------
+    dict
+        The source dictionnary with the exposure time updated
+    
+    Example
+    -------
+    .. code-block:: python
+
+        >>> from exoschedule.functions import get_exoplanet_dict, update_exposure_time
+        >>> ep = get_exoplanet_dict()
+        >>> ep = update_exposure_time(ep, "/databf/nenufar/LT02", "/databf/nenufar/ES02", save=True)
+    """
+
+    obs_directories = find_directories(*data_paths, from_time=last_check())
+    if len(obs_directories) == 0:
+        log.info("No observation directories found.")
+        # Nothing to do here
+        return source_dict
+
+    for src in source_dict:
+        dt = get_source_exposure_time(source_name=src, observation_directories=obs_directories)
+        last_obs = Time(source_dict[src]["last_observation"]) if dt < TimeDelta(1, format="sec") else get_source_last_observation(source_name=src, observation_directories=obs_directories)
+        previous_exposure_time = source_dict[src]["exposure_time_hours"]
+        current_exposure_time = dt.sec / 3600
+        source_dict[src]["exposure_time_hours"] += current_exposure_time
+        source_dict[src]["last_observation"] = last_obs.isot
+        if source_dict[src]["exposure_time_hours"] != previous_exposure_time:
+            log.info(f"{src}: DT={(current_exposure_time)}h added.")
+
+    if save:
+        update_last_check(last_observation_checked=sorted(obs_directories)[-1])
         _modify_json_files(source_dict)
     
     return source_dict
