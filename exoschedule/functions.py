@@ -105,6 +105,16 @@ def reset_last_check() -> None:
 
     with open(LAST_CHECK_JSON, "w") as wfile:
         json.dump(last_check_info, wfile)
+    
+    # Do the same for source dictionnaries
+    exoplanets = get_exoplanet_dict()
+    stars = get_star_dict()
+    for exoplanet in exoplanets:
+        exoplanets[exoplanet]["last_observation"] = "2000-01-01T00:00:00"
+    _modify_json_files(exoplanets)
+    for star in stars:
+        stars[star]["last_observation"] = "2000-01-01T00:00:00"
+    _modify_json_files(stars)
 
 
 # ============================================================= #
